@@ -29,7 +29,7 @@ SdVolume volume;
 SdFile root;
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-long pulse, cm1, cm2, cm3, dist;
+long cm1, cm2, cm3, dist;
 float water_temp, air_temp, humidity, pressure;
 IridiumSBD isbd(Serial1, 8); 
 
@@ -102,10 +102,9 @@ void sleepNow() {
 }
 void loop() {
   DateTime now = rtc.now();
-  pulse = pulseIn(sonarPin, HIGH);
-  cm1 = pulse/57.87;
-  cm2 = pulse/57.87;
-  cm3 = pulse/57.87;
+  cm1 = pulseIn(sonarPin, HIGH)/57.87;
+  cm2 = pulseIn(sonarPin, HIGH)/57.87;
+  cm3 = pulseIn(sonarPin, HIGH)/57.87;
   dist = (cm1 + cm2 + cm3) / 3;
   sensors.requestTemperatures();
   water_temp = sensors.getTempCByIndex(0);
