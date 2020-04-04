@@ -6,6 +6,8 @@
 //Climate Data: Adafruit BME280           | SCK(9), SDO(12), SDI(11), CS(10)        | https://www.adafruit.com/product/2652
 //Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
 
+#define period 10 //In minutes 
+
 #include <avr/sleep.h>
 #include "RTClib.h"
 #include <OneWire.h> 
@@ -13,25 +15,30 @@
 #include <Wire.h>
 #include <time.h>
 #include <SPI.h>
-#include <SD.h>
+//#include <SD.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include "IridiumSBD.h"
 
-int wakePin = 4;
-int sigQuality = 6;
+
+#define readings 4
+#define rLength 10
+#define payload 6 + readings * rLength
+
+
 struct tm isbd_time;
-const int sonarPin = 5;
+long t;
+#define sonarPin 5
 #define ONE_WIRE_BUS 6 //Water Temp Sensor
-const int chipSelect = 7; //SD Card Select Pin
-Sd2Card card;
-SdVolume volume;
-SdFile root;
+#define SDPin 7 //SD Card Select Pin
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-long cm1, cm2, cm3, dist;
-float water_temp, air_temp, humidity, pressure;
+int cm1, cm2, cm3, dist[readings];
+int count = 0;
+int water_temp[readings], air_temp[readings], humidity[readings], pressure[readings];
 IridiumSBD isbd(Serial1, 8); 
+//File myFile;
+byte message[payload];
 
 #define BME_SCK 9
 #define BME_MISO 12
@@ -42,97 +49,131 @@ Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);
 RTC_PCF8523 rtc;
 
 void setup() {
-  //Serial.begin(19200);
-  Serial1.begin(19200); 
+  Serial.begin(19200);
+  Serial1.begin(19200);
   while (!Serial) {
     delay(1);  // for Leonardo/Micro/Zero
   }
-  //Serial.println("Serial Established");
-  if (! rtc.begin()) {
-    //Serial.println("Couldn't find RTC");
-    while (1);
-  }
-
-  if (!bme.begin()) {  
-    //Serial.println("Could not find a valid BME280 sensor, check wiring!");
-    while (1);
-  }
-
-  if (!card.init(SPI_HALF_SPEED, chipSelect)) {
-    //Serial.println("initialization failed. Things to check:");
-    //Serial.println("* is a card inserted?");
-    //Serial.println("* is your wiring correct?");
-    //Serial.println("* did you change the chipSelect pin to match your shield or module?");
-    while (1);
-  } 
-  pinMode(wakePin, INPUT);
-  pinMode(sonarPin, INPUT);
-  //Serial.println("Starting RockBlock");
+  Serial.println("Serial started"); 
+  rtc.begin();
+  Serial.println("Clock Started.");
+  bme.begin();
+  Serial.println("Climate Sensors Started.");
+//  pinMode(SDPin, OUTPUT);
+//  SD.begin(SDPin);
   isbd.begin();
-  //Serial.println("RockBlock Initalized");
-  //Serial.print("Getting Iridium Time");
+  Serial.println("Sat Comms Started");
+  Serial.print("Getting current time");
   while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
-    //Serial.print(".");
     delay(1000);
+    Serial.print(".");
   }
-  //Serial.println();
-  //char buf[32];
-  //sprintf(buf, "%d-%02d-%02d %02d:%02d:%02d",
-  //  isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec);
-  //Serial.print("Iridium time/date is ");
-  //Serial.print(buf);
-  //Serial.println();
-  rtc.adjust(DateTime(isbd_time.tm_year, isbd_time.tm_mon, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
-  //attachInterrupt(0, wakeUpNow, LOW);
-}
-
-void wakeUpNow()// here the interrupt is handled after wakeup
-{
-  
-}
-//Function to put Arduino to sleep
-void sleepNow() {
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  sleep_enable();
-  attachInterrupt(0, wakeUpNow, LOW);
-  sleep_mode();
-  //Arduino is sleeping here
-  sleep_disable();
-  detachInterrupt(0);
-}
-void loop() {
+  Serial.println();
+  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
+  Serial.println("Clock Set to ");
   DateTime now = rtc.now();
+  Serial.print(now.year(), DEC);
+  Serial.print('-');
+  Serial.print(now.month() + 1, DEC);
+  Serial.print('-');
+  Serial.print(now.day(), DEC);
+  Serial.print(" ");
+  Serial.print(now.hour(), DEC);
+  Serial.print(':');
+  Serial.print(now.minute(), DEC);
+  Serial.print(':');
+  Serial.print(now.second(), DEC);
+  Serial.println();
+  Serial.print("Taking Measurement every ");
+  Serial.print(period);
+  Serial.print(" Minutes");
+  Serial.println();
+}
+//
+//String Unixfile(String U)
+//{
+//  char Name[12] = {0};
+//  for (int i = 0; i < 7; i++)
+//  {
+//    Name[i] = U[i];
+//  }
+//  Name[7] = '.';
+//  for (int i = 7; i < 10; i++)
+//  {
+//    Name[i + 1] = U[i];
+//  }
+//
+//  return Name;
+//}
+
+void loop() {
+  Serial.print("Recording measurement: ");
+  Serial.println(count);
+  if(count == 0){t = rtc.now().unixtime();}
   cm1 = pulseIn(sonarPin, HIGH)/57.87;
   cm2 = pulseIn(sonarPin, HIGH)/57.87;
   cm3 = pulseIn(sonarPin, HIGH)/57.87;
-  dist = (cm1 + cm2 + cm3) / 3;
+  dist[count] = (cm1 + cm2 + cm3) / 3;
   sensors.requestTemperatures();
-  water_temp = sensors.getTempCByIndex(0);
-  air_temp = bme.readTemperature();
-  humidity = bme.readPressure()/100;
-  pressure = bme.readPressure()/100;
-
-  //Serial.print(now.hour(), DEC);
-  //Serial.print(':');
-  //Serial.print(now.minute(), DEC);
-  //Serial.print(':');
-  //Serial.print(now.second(), DEC);
-  //Serial.print(" - ");
-  //erial.print(dist);
-  //Serial.print("cm, ");
-  //Serial.print("water: ");
-  //Serial.print(water_temp);
-  //Serial.print("C, Air: ");
-  //Serial.print(ait_temp);
-  //Serial.print("C, Pressure: ");
-  //Serial.print(pressure);
-  //Serial.print("hPa, Humidity: "); 
-  //Serial.print(humidity);
-  //Serial.print("%, RSSI: ");
-  //isbd.getSignalQuality(sigQuality);
-  //Serial.print(sigQuality);
-  //Serial.println();
+  water_temp[count] = sensors.getTempCByIndex(0)* 100;
+  air_temp[count] = bme.readTemperature() * 100;
+  humidity[count] = bme.readHumidity() * 100;
+  pressure[count] = bme.readPressure();
   
-  delay(4000);
-// sleepNow();
+  //String file = Unixfile(String(rtc.now().unixtime()));
+  //Serial.println(file);
+  //myFile = SD.open(file, FILE_WRITE);
+  //myFile.print(dist);
+  //myFile.print(water_temp);
+  //myFile.print(air_temp);;
+  //myFile.print(pressure);
+  //myFile.print(humidity);
+  //myFile.flush();
+  //myFile.close();
+  if (count < readings){
+    count ++;
+  }
+  else{
+    count = 0;
+    //Time (4)
+    message[0] = (long) t >> 24;
+    message[1] = (long) t >> 16;
+    message[2] = (long) t >> 8;
+    message[3] = (long) t;
+    //Diff (2)
+    message[4] = (int) period >> 8;
+    message[5] = (int) period;
+    for (int i = 0; i < readings; i++)
+   {    
+    //Distance
+      message[6 + (i * rLength)] = (int) dist[i] >> 8;
+      message[7 + (i * rLength)] = (int) dist[i];
+    //Water Temp
+      message[8 + (i * rLength)] = (int) water_temp[i] >> 8;
+      message[9 + (i * rLength)] = (int) water_temp[i];
+    //Air Temp
+      message[10 + (i * rLength)] = (int) air_temp[i] >> 8;
+      message[11 + (i * rLength)] = (int) air_temp[i];
+    //Humidity
+      message[12 + (i * rLength)] = (int) humidity[i] >> 8;
+      message[13 + (i * rLength)] = (int) humidity[i];
+    //Pressure
+      message[14 + (i * rLength)] = (int) pressure[i] >> 8;
+      message[15 + (i * rLength)] = (int) pressure[i];
+   }
+    Serial.print("Sending Message: ");
+    for(int i = 0; i < payload; i+=2){ 
+      char buff[2];
+      sprintf(buff, "%02X", message[i]);
+      Serial.print(buff);
+      sprintf(buff, "%02X", message[i+1]);
+      Serial.print(buff);
+      Serial.print(" ");  
+      }
+    Serial.println();
+    //isbd.sendSBDBinary(message, payload);
+    
+  }
+  delay(1000L*period*60);
+  //delay(500);
 }
