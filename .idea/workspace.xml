@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="b231c398-e449-4d9b-8948-7250fd8ec352" name="Default Changelist" comment="" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Flask Main" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectId" id="1aExWBRlEw7v7n5crSVewi28iUQ" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showExcludedFiles" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/static" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="water" type="Python.FlaskServer">
+      <module name="water" />
+      <option name="target" value="$PROJECT_DIR$/water.py" />
+      <option name="targetType" value="PATH" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="b231c398-e449-4d9b-8948-7250fd8ec352" name="Default Changelist" comment="" />
+      <created>1586314583510</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1586314583510</updated>
+      <workItem from="1586314600658" duration="2183000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="1" />
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="1000" y="513" width="553" height="392" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1586314878046">
+      <screen x="0" y="0" width="2560" height="1414" />
+    </state>
+    <state x="1000" y="513" width="553" height="392" key="#com.intellij.fileTypes.FileTypeChooser/0.0.2560.1414@0.0.2560.1414" timestamp="1586314878046" />
+    <state width="2518" height="398" key="GridCell.Tab.0.bottom" timestamp="1586314930949">
+      <screen x="0" y="0" width="2560" height="1414" />
+    </state>
+    <state width="2518" height="398" key="GridCell.Tab.0.bottom/0.0.2560.1414@0.0.2560.1414" timestamp="1586314930949" />
+    <state width="2518" height="398" key="GridCell.Tab.0.center" timestamp="1586314930945">
+      <screen x="0" y="0" width="2560" height="1414" />
+    </state>
+    <state width="2518" height="398" key="GridCell.Tab.0.center/0.0.2560.1414@0.0.2560.1414" timestamp="1586314930945" />
+    <state width="2518" height="398" key="GridCell.Tab.0.left" timestamp="1586314930942">
+      <screen x="0" y="0" width="2560" height="1414" />
+    </state>
+    <state width="2518" height="398" key="GridCell.Tab.0.left/0.0.2560.1414@0.0.2560.1414" timestamp="1586314930942" />
+    <state width="2518" height="398" key="GridCell.Tab.0.right" timestamp="1586314930947">
+      <screen x="0" y="0" width="2560" height="1414" />
+    </state>
+    <state width="2518" height="398" key="GridCell.Tab.0.right/0.0.2560.1414@0.0.2560.1414" timestamp="1586314930947" />
+  </component>
+</project>

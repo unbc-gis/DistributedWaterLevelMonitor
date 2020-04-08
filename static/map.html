@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+    <heat>
+        <title>BC Water Level Mapping</title>
+        <script src="https://api.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js"></script>
+        <link href="https://api.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css" rel="stylesheet" />
+    </heat>
+    <body>
+    <H1>BC Water Level Mapping</H1>
+    <div id="map" width="100%", style="height:800px"></div>
+    <script>
+    mapboxgl.accessToken = "pk.eyJ1IjoiZ2VvZ3V5IiwiYSI6ImNrMzk5YWI2NTAwMW0zY2xoYWpodGZzbXMifQ.URebhS-ujya0vK88OxLTRg";
+    var map = new mapboxgl.Map({
+     container: 'map',
+     style: 'mapbox://styles/geoguy/ck39a3dr8012z1cpj7sty9s5u'
+    });
+   </script>
+  </body>
+</html>
