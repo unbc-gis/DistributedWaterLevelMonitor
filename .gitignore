@@ -1,1 +1,3 @@
-*.pass
+*.env
+test.txt
+
