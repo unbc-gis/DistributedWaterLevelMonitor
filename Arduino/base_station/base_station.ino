@@ -6,7 +6,7 @@
 //Climate Data: Adafruit BME280           | SCK(9), SDO(12), SDI(11), CS(10)        | https://www.adafruit.com/product/2652
 //Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
 
-#define period 10 //In minutes 
+#define period 1 //In minutes 
 
 #include <avr/sleep.h>
 #include "RTClib.h"
@@ -51,9 +51,9 @@ RTC_PCF8523 rtc;
 void setup() {
   Serial.begin(19200);
   Serial1.begin(19200);
-  while (!Serial) {
-    delay(1);  // for Leonardo/Micro/Zero
-  }
+//  while (!Serial) {
+//    delay(1);  // for Leonardo/Micro/Zero
+//  }
   Serial.println("Serial started"); 
   rtc.begin();
   Serial.println("Clock Started.");
@@ -62,6 +62,13 @@ void setup() {
 //  pinMode(SDPin, OUTPUT);
 //  SD.begin(SDPin);
   isbd.begin();
+
+  //First sensor reading always wrong so lets get it out of the way
+  sensors.requestTemperatures();
+  bme.readTemperature();
+  bme.readHumidity();
+  bme.readPressure();
+  
   Serial.println("Sat Comms Started");
   Serial.print("Getting current time");
   while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
@@ -130,7 +137,7 @@ void loop() {
   //myFile.print(humidity);
   //myFile.flush();
   //myFile.close();
-  if (count < readings){
+  if (count < readings - 1){
     count ++;
   }
   else{
@@ -168,11 +175,11 @@ void loop() {
       Serial.print(buff);
       sprintf(buff, "%02X", message[i+1]);
       Serial.print(buff);
-      Serial.print(" ");  
+      //Serial.print(" ");  
       }
     Serial.println();
-    //isbd.sendSBDBinary(message, payload);
-    
+    isbd.sendSBDBinary(message, payload);
+    Serial.println("Sent");
   }
   delay(1000L*period*60);
   //delay(500);
