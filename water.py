@@ -3,6 +3,7 @@ import sys
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
+from flask import jsonify
 
 
 app = Flask(__name__)
@@ -16,6 +17,12 @@ SQLALCHEMY_TRACK_MODIFICATIONS = False
 @app.route('/')
 def landing():
     return app.send_static_file('map.html')
+
+
+@app.route("/deployments", methods=["GET"])
+def deployments():
+    sites = models.Deployment.query.all()
+    return jsonify([i.__serialize__() for i in sites])
 
 
 @app.route("/rockblock", methods=["POST"])

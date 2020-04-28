@@ -1,5 +1,8 @@
 from water import db
 from geoalchemy2 import Geometry
+import geoalchemy2
+from shapely_geojson import dumps, Feature
+from geoalchemy2.shape import to_shape
 
 class Deployment(db.Model):
     __tablename__ = 'deployment'
@@ -10,6 +13,7 @@ class Deployment(db.Model):
     height = db.Column(db.Integer)
     deployed = db.Column(db.TIMESTAMP)
     retrieved = db.Column(db.TIMESTAMP)
+    url = db.Column(db.Text)
 
     def __init__(self, id, imei, location, height, deployed):
         self.id = id
@@ -25,11 +29,10 @@ class Deployment(db.Model):
         return {
             'id': self.id,
             'IMEI': self.imei,
-            'location': self.location,
+            'location': dumps(Feature(to_shape(self.location))),
             'height': self.height,
             'deployed': self.deployed,
             'retrieved': self.retrieved
-
         }
 
 
