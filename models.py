@@ -32,7 +32,8 @@ class Deployment(db.Model):
             'location': dumps(Feature(to_shape(self.location))),
             'height': self.height,
             'deployed': self.deployed,
-            'retrieved': self.retrieved
+            'retrieved': self.retrieved,
+            'url': self.url
         }
 
 

@@ -4,10 +4,14 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from flask import jsonify
+import os
 
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:KC%r^XS9S5b&9&dT@localhost/water_level'
+
+password = open(app.root_path + "/passwd.cred", "r")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + password.readline().rstrip() + ':' + password.readline().rstrip() + '@localhost/' + password.readline().rstrip()
+print(app.config['SQLALCHEMY_DATABASE_URI'], file=sys.stdout)
 db = SQLAlchemy(app)
 import models
 
