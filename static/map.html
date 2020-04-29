@@ -1,34 +1,19 @@
 <!DOCTYPE html>
 <html>
-<heat>
-    <title>BC Water Level Mapping</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-          crossorigin=""/>
-    <!-- Make sure you put this AFTER Leaflet's CSS -->
-    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
-            integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
-            crossorigin=""></script>
-</heat>
-<body>
-<H1>BC Water Level Mapping</H1>
-<div id="mapid" width="100%", style="height:800px"></div>
-<script>
-    var map = L.map('mapid').setView([53.8542, -122.7791], 12);
-    var wmsLayer = L.tileLayer.wms('http://142.207.145.101/cgi-bin/qgis_mapserv.fcgi?map=/home/matt/DistributedWaterLevelMonitor/qgis_map.qgs', {layers: 'deployment'}).addTo(map);
-
-    var osmLink = '<a href="http://openstreetmap.org">OpenStreetMap</a>';
-    var osmURL = 'http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-    var osmAttrib = '&copy; ' + osmLink;
-
-    var osmMap = L.tileLayer(osmURL, {attribution: osmAttrib});
-
-    var baseLayers = {
-        "OSM Mapnik": osmMap
-    };
-
-    //Add baseLayers to map as control layers
-    L.control.layers(baseLayers).addTo(map);
-</script>
-</body>
+    <heat>
+        <title>BC Water Level Mapping</title>
+        <script src="https://api.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.js"></script>
+        <link href="https://api.mapbox.com/mapbox-gl-js/v1.5.0/mapbox-gl.css" rel="stylesheet" />
+    </heat>
+    <body>
+    <H1>BC Water Level Mapping</H1>
+    <div id="map" width="100%", style="height:800px"></div>
+    <script>
+    mapboxgl.accessToken = "pk.eyJ1IjoiZ2VvZ3V5IiwiYSI6ImNrMzk5YWI2NTAwMW0zY2xoYWpodGZzbXMifQ.URebhS-ujya0vK88OxLTRg";
+    var map = new mapboxgl.Map({
+     container: 'map',
+     style: 'mapbox://styles/geoguy/ck39a3dr8012z1cpj7sty9s5u'
+    });
+   </script>
+  </body>
 </html>

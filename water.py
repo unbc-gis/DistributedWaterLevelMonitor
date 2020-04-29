@@ -1,27 +1,46 @@
-from flask import Flask, Response, request
+from flask import Flask, Response, request, render_template
 import sys
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from flask import jsonify
-import os
-
 
 app = Flask(__name__)
 
 password = open(app.root_path + "/passwd.cred", "r")
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://' + password.readline().rstrip() + ':' + password.readline().rstrip() + '@localhost/' + password.readline().rstrip()
-print(app.config['SQLALCHEMY_DATABASE_URI'], file=sys.stdout)
 db = SQLAlchemy(app)
 import models
 
+
 migrate = Migrate(app, db)
 SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 
 @app.route('/')
 def landing():
     return app.send_static_file('map.html')
 
+@app.route('/graph')
+def graphs():
+    time = []
+    level = []
+    water_temp = []
+    air_temp = []
+    pressure = []
+    humidity = []
+
+    site = models.Deployment.query.filter(models.Deployment.id == request.args.get("deployment")).first()
+    readings = models.Measurement.query.filter(models.Measurement.deployment == request.args.get("deployment")).order_by(models.Measurement.time.desc()).all()
+    for measurement in readings:
+        time.insert(0, measurement.time)
+        level.insert(0, site.height - measurement.level)
+        water_temp.insert(0, measurement.water_temp)
+        air_temp.insert(0, measurement.air_temp)
+        pressure.insert(0, measurement.pressure)
+        humidity.insert(0, measurement.humidity)
+
+    return render_template('graphs.html', water_level=level, labels=time, air_temp=air_temp, water_temp=water_temp, pressure=pressure, humidity=humidity)
 
 @app.route("/deployments", methods=["GET"])
 def deployments():

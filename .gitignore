@@ -1,3 +1,11 @@
 *.env
 test.txt
 passwd.cred
+*.pyc
+app.db
+./tmp
+./build/*
+.idea
+env
+venv
+*.sublime*

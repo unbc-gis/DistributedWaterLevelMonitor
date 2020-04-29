@@ -21,6 +21,7 @@ class Deployment(db.Model):
         self.location = location
         self.height = height
         self.deployed = deployed
+        self.url = 'http://142.207.145.101/results?deployment=' + str(id)
 
     def __repr__(self):
         return '<id {}>'.format(self.id)
@@ -70,9 +71,9 @@ class Measurement(db.Model):
         return {
             'deployment': self.deployment,
             'time': self.time,
-            'level': str(self.level),
-            'water_temp': str(self.water_temp),
-            'air_temp': str(self.water_temp),
-            'humidity': str(self.humidity),
-            'pressure': str(self.pressure)
+            'level': self.level,
+            'water_temp': self.water_temp,
+            'air_temp': self.water_temp,
+            'humidity': self.humidity,
+            'pressure': self.pressure
         }
