@@ -70,9 +70,9 @@ class Measurement(db.Model):
         return {
             'deployment': self.deployment,
             'time': self.time,
-            'level': self.level,
-            'water_temp': self.water_temp,
-            'air_temp': self.water_temp,
-            'humidity': self.humidity,
-            'pressure': self.pressure
+            'level': str(self.level),
+            'water_temp': str(self.water_temp),
+            'air_temp': str(self.water_temp),
+            'humidity': str(self.humidity),
+            'pressure': str(self.pressure)
         }

@@ -28,6 +28,10 @@ def deployments():
     sites = models.Deployment.query.all()
     return jsonify([i.__serialize__() for i in sites])
 
+@app.route("/results", methods=["GET"])
+def results():
+    readings = models.Measurement.query.filter(models.Measurement.deployment == request.args.get("deployment")).all()
+    return jsonify([i.__serialize__() for i in readings])
 
 @app.route("/rockblock", methods=["POST"])
 def rock_block():
