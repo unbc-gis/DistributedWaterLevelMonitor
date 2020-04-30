@@ -6,7 +6,7 @@
 //Climate Data: Adafruit BME280           | SCK(9), SDO(12), SDI(11), CS(10)        | https://www.adafruit.com/product/2652
 //Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
 
-#define period 1 //In minutes 
+#define period 360 //In minutes 
 
 #include <avr/sleep.h>
 #include "RTClib.h"
@@ -54,6 +54,7 @@ void setup() {
 //  while (!Serial) {
 //    delay(1);  // for Leonardo/Micro/Zero
 //  }
+  delay(4000);
   Serial.println("Serial started"); 
   rtc.begin();
   Serial.println("Clock Started.");
@@ -76,7 +77,7 @@ void setup() {
     Serial.print(".");
   }
   Serial.println();
-  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
+  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
   Serial.println("Clock Set to ");
   DateTime now = rtc.now();
   Serial.print(now.year(), DEC);
