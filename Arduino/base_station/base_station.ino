@@ -123,10 +123,10 @@ void loop() {
   cm3 = pulseIn(sonarPin, HIGH)/57.87;
   dist[count] = (cm1 + cm2 + cm3) / 3;
   sensors.requestTemperatures();
-  water_temp[count] = sensors.getTempCByIndex(0)* 100;
-  air_temp[count] = bme.readTemperature() * 100;
-  humidity[count] = bme.readHumidity() * 100;
-  pressure[count] = bme.readPressure();
+  water_temp[count] = (int) sensors.getTempCByIndex(0)* 100;
+  air_temp[count] = (int) bme.readTemperature() * 100;
+  humidity[count] = (int) bme.readHumidity() * 100;
+  pressure[count] = (int) bme.readPressure();
   
   //String file = Unixfile(String(rtc.now().unixtime()));
   //Serial.println(file);
