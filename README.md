@@ -10,7 +10,9 @@ Use the script addDeployment.py, setting the IMEI, Location and Mounting heigt, 
 # The Project
 This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests Lands and Natural Resourses. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
 
-The individual stations communicate via Rockblock satillite modems using the Iridium constilation, and are built using Arduino microcontrollers. 
+The individual stations communicate via Rockblock satillite modems using the Iridium constilation, and are built using Arduino microcontrollers. By leveraging satillite communication, and low power monitoring tools, it is made practicle to deploy sensors in locations without existing cellular or radio ifrastructure and where it may be expensive for crews to access on a regular basis.
+
+By placing all the data into a centeral database there are options opend for correlating measurements across watersheds, and viewing the same watercourse at differnt points.
 
 ## The Station
 The station is built using an Arduino Microcontroller (Original prototype was Arduino Micro, however Arduino Mega is the recomened board as it contains sufficent storage space for SD card Library for more frequent logging).
