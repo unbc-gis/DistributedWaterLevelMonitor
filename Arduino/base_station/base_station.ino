@@ -28,7 +28,7 @@
 
 struct tm isbd_time;
 long t;
-#define sonarPin 5
+#define sonarPin 9
 #define ONE_WIRE_BUS 6 //Water Temp Sensor
 #define SDPin 7 //SD Card Select Pin
 OneWire oneWire(ONE_WIRE_BUS);
@@ -40,44 +40,52 @@ IridiumSBD isbd(Serial1, 8);
 //File myFile;
 byte message[payload];
 
-#define BME_SCK 9
-#define BME_MISO 12
-#define BME_MOSI 11 
-#define BME_CS 10
-Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);
+#define BME_SCK 52
+#define BME_MISO 50
+#define BME_MOSI 51 
+#define BME_CS 53
+Adafruit_BME280 bme; // I2C
+//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);  // Software SPI
+//Adafruit_BME280 bme(BME_CS);  // Hardware SPI
 
 RTC_PCF8523 rtc;
 
 void setup() {
+  digitalWrite(8, LOW);
   Serial.begin(19200);
   Serial1.begin(19200);
-//  while (!Serial) {
-//    delay(1);  // for Leonardo/Micro/Zero
-//  }
-  delay(4000);
+  Serial1.begin(19200);
+  while (!Serial) {
+    delay(1);  // for Leonardo/Micro/Zero
+  }
+  delay(1000);
   Serial.println("Serial started"); 
   rtc.begin();
   Serial.println("Clock Started.");
-  bme.begin();
+  bme.begin(0x76);
   Serial.println("Climate Sensors Started.");
 //  pinMode(SDPin, OUTPUT);
 //  SD.begin(SDPin);
+  Serial.println("Debug 0");
+  isbd.useMSSTMWorkaround(false);
   isbd.begin();
-
+  
+  Serial.println("Debug 1");
   //First sensor reading always wrong so lets get it out of the way
   sensors.requestTemperatures();
+  
   bme.readTemperature();
   bme.readHumidity();
   bme.readPressure();
   
   Serial.println("Sat Comms Started");
   Serial.print("Getting current time");
-  while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
-    delay(1000);
-    Serial.print(".");
-  }
-  Serial.println();
-  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
+//  while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
+//    delay(1000);
+//    Serial.print(".");
+//  }
+//  Serial.println();
+//  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
   Serial.println("Clock Set to ");
   DateTime now = rtc.now();
   Serial.print(now.year(), DEC);
@@ -118,15 +126,24 @@ void loop() {
   Serial.print("Recording measurement: ");
   Serial.println(count);
   if(count == 0){t = rtc.now().unixtime();}
+  Serial.println(pulseIn(sonarPin, HIGH));
   cm1 = pulseIn(sonarPin, HIGH)/57.87;
+  Serial.println(cm1);
   cm2 = pulseIn(sonarPin, HIGH)/57.87;
+  Serial.println(cm2);
   cm3 = pulseIn(sonarPin, HIGH)/57.87;
+  Serial.println(cm3);
   dist[count] = (cm1 + cm2 + cm3) / 3;
+  Serial.println(dist[count]);
   sensors.requestTemperatures();
   water_temp[count] = (int) sensors.getTempCByIndex(0)* 100;
+  Serial.println(water_temp[count]);
   air_temp[count] = (int) bme.readTemperature() * 100;
+  Serial.println(air_temp[count]);
   humidity[count] = (int) bme.readHumidity() * 100;
+  Serial.println(humidity[count]);
   pressure[count] = (int) bme.readPressure();
+  Serial.println(pressure[count]);
   
   //String file = Unixfile(String(rtc.now().unixtime()));
   //Serial.println(file);
