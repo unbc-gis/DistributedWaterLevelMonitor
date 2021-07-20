@@ -29,7 +29,7 @@
 struct tm isbd_time;
 long t;
 #define sonarPin 9
-#define ONE_WIRE_BUS 6 //Water Temp Sensor
+#define ONE_WIRE_BUS 2 //Water Temp Sensor
 #define SDPin 7 //SD Card Select Pin
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
@@ -40,10 +40,12 @@ IridiumSBD isbd(Serial1, 8);
 //File myFile;
 byte message[payload];
 
-#define BME_SCK 52
-#define BME_MISO 50
-#define BME_MOSI 51 
-#define BME_CS 53
+// No longer needed because I2C is currently being used.
+// #define BME_SCK 52
+// #define BME_MISO 50
+// #define BME_MOSI 51 
+// #define BME_CS 53
+
 Adafruit_BME280 bme; // I2C
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);  // Software SPI
 //Adafruit_BME280 bme(BME_CS);  // Hardware SPI
@@ -62,7 +64,10 @@ void setup() {
   Serial.println("Serial started"); 
   rtc.begin();
   Serial.println("Clock Started.");
-  bme.begin(0x76);
+//  sensors.begin();
+  if (!bme.begin(0x76)) {
+    Serial.println("Could not find BME sensor.");
+  }
   Serial.println("Climate Sensors Started.");
 //  pinMode(SDPin, OUTPUT);
 //  SD.begin(SDPin);
@@ -128,21 +133,30 @@ void loop() {
   if(count == 0){t = rtc.now().unixtime();}
   Serial.println(pulseIn(sonarPin, HIGH));
   cm1 = pulseIn(sonarPin, HIGH)/57.87;
+  Serial.print("Sonar measurement #1: ");
   Serial.println(cm1);
   cm2 = pulseIn(sonarPin, HIGH)/57.87;
+  Serial.print("Sonar measurement #2: ");
   Serial.println(cm2);
   cm3 = pulseIn(sonarPin, HIGH)/57.87;
+  Serial.print("Sonar measurement #3: ");
   Serial.println(cm3);
+  // TODO: Change this to take the median value.
   dist[count] = (cm1 + cm2 + cm3) / 3;
+  Serial.print("Sonar measurement avg: ");
   Serial.println(dist[count]);
   sensors.requestTemperatures();
   water_temp[count] = (int) sensors.getTempCByIndex(0)* 100;
+  Serial.print("Water Temp: ");
   Serial.println(water_temp[count]);
   air_temp[count] = (int) bme.readTemperature() * 100;
+  Serial.print("Air Temp: ");
   Serial.println(air_temp[count]);
   humidity[count] = (int) bme.readHumidity() * 100;
+  Serial.print("Humidity: ");
   Serial.println(humidity[count]);
   pressure[count] = (int) bme.readPressure();
+  Serial.print("Pressure: ");
   Serial.println(pressure[count]);
   
   //String file = Unixfile(String(rtc.now().unixtime()));
