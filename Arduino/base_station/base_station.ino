@@ -1,12 +1,15 @@
+#include <SD.h>
+
 //Arduino Micro
-//Sonar Sensor: MaxBotix MB7052-100       | Data Pin 5                              | https://www.maxbotix.com/articles/095.htm
+//Sonar Sensor: MaxBotix MB7052-100       | Data Pin 9                              | https://www.maxbotix.com/articles/095.htm
 //RTC: PCF 8523                           | SDA(Pin 2), SCL(Pin 3), Wake(Pin 4)     | https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino
 //SD-Card: Adafruit Micro-SD Breakout+    | Pin MISO, MSIO, SLCK, 7                 | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction
-//Water Temp: Adafruit DS18B20            | Pin 6                                   | https://www.adafruit.com/product/381
-//Climate Data: Adafruit BME280           | SCK(9), SDO(12), SDI(11), CS(10)        | https://www.adafruit.com/product/2652
+//Water Temp: Adafruit DS18B20            | Pin 2                                   | https://www.adafruit.com/product/381
+//Climate Data: Adafruit BME280           | SCK(20), SDO(N/A), SDI(21), CS(N/A)     | https://www.adafruit.com/product/2652
 //Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
 
-#define period 360 //In minutes 
+#define transmitPeriod 360 // In minutes 
+#define recordPeriod 10 // In minutes
 
 #include <avr/sleep.h>
 #include "RTClib.h"
@@ -15,7 +18,7 @@
 #include <Wire.h>
 #include <time.h>
 #include <SPI.h>
-//#include <SD.h>
+#include <SD.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BME280.h>
 #include "IridiumSBD.h"
@@ -30,14 +33,14 @@ struct tm isbd_time;
 long t;
 #define sonarPin 9
 #define ONE_WIRE_BUS 2 //Water Temp Sensor
-#define SDPin 7 //SD Card Select Pin
+#define SDPin 53 //SD Card Select Pin
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 int cm1, cm2, cm3, dist[readings];
 int count = 0;
 int water_temp[readings], air_temp[readings], humidity[readings], pressure[readings];
 IridiumSBD isbd(Serial1, 8); 
-//File myFile;
+File myFile;
 byte message[payload];
 
 // No longer needed because I2C is currently being used.
@@ -64,13 +67,24 @@ void setup() {
   Serial.println("Serial started"); 
   rtc.begin();
   Serial.println("Clock Started.");
-//  sensors.begin();
+  
+  sensors.begin();
+
+  //Initialize BME280
   if (!bme.begin(0x76)) {
-    Serial.println("Could not find BME sensor.");
+    Serial.println("Could not find BME280 Climate Sensor.");
+  } else {
+    Serial.println("BME820 Climate Sensor initialized.");
   }
-  Serial.println("Climate Sensors Started.");
-//  pinMode(SDPin, OUTPUT);
-//  SD.begin(SDPin);
+
+  //Initialize Adafruit Micro SD Breakout+
+  pinMode(SDPin, OUTPUT);
+  if (!SD.begin(SDPin)) {
+    Serial.println("Micro SD Card Reader could not initialize.");
+  } else {
+    Serial.println("Micro SD Card Reader initalized.");
+  }
+  
   Serial.println("Debug 0");
   isbd.useMSSTMWorkaround(false);
   isbd.begin();
@@ -106,26 +120,26 @@ void setup() {
   Serial.print(now.second(), DEC);
   Serial.println();
   Serial.print("Taking Measurement every ");
-  Serial.print(period);
+  Serial.print(transmitPeriod);
   Serial.print(" Minutes");
   Serial.println();
 }
-//
-//String Unixfile(String U)
-//{
-//  char Name[12] = {0};
-//  for (int i = 0; i < 7; i++)
-//  {
-//    Name[i] = U[i];
-//  }
-//  Name[7] = '.';
-//  for (int i = 7; i < 10; i++)
-//  {
-//    Name[i + 1] = U[i];
-//  }
-//
-//  return Name;
-//}
+
+String Unixfile(String U)
+{
+  char Name[12] = {0};
+  for (int i = 0; i < 7; i++)
+  {
+    Name[i] = U[i];
+  }
+  Name[7] = '.';
+  for (int i = 7; i < 10; i++)
+  {
+    Name[i + 1] = U[i];
+  }
+
+  return Name;
+}
 
 void loop() {
   Serial.print("Recording measurement: ");
@@ -145,10 +159,12 @@ void loop() {
   dist[count] = (cm1 + cm2 + cm3) / 3;
   Serial.print("Sonar measurement avg: ");
   Serial.println(dist[count]);
+  
   sensors.requestTemperatures();
   water_temp[count] = (int) sensors.getTempCByIndex(0)* 100;
   Serial.print("Water Temp: ");
   Serial.println(water_temp[count]);
+
   air_temp[count] = (int) bme.readTemperature() * 100;
   Serial.print("Air Temp: ");
   Serial.println(air_temp[count]);
@@ -158,17 +174,30 @@ void loop() {
   pressure[count] = (int) bme.readPressure();
   Serial.print("Pressure: ");
   Serial.println(pressure[count]);
-  
-  //String file = Unixfile(String(rtc.now().unixtime()));
-  //Serial.println(file);
-  //myFile = SD.open(file, FILE_WRITE);
-  //myFile.print(dist);
-  //myFile.print(water_temp);
-  //myFile.print(air_temp);;
-  //myFile.print(pressure);
-  //myFile.print(humidity);
-  //myFile.flush();
-  //myFile.close();
+
+  String file = Unixfile(String(rtc.now().unixtime()));
+  if (!SD.exists(file)) {
+    Serial.println(rtc.now().unixtime());
+    Serial.println(file);
+    myFile = SD.open(file, FILE_WRITE);
+    myFile.print("Sonar: ");
+    myFile.println(dist[count]);
+    myFile.print("Water temp: ");
+    myFile.println(water_temp[count]);
+    myFile.print("Air temp: ");
+    myFile.println(air_temp[count]);
+    myFile.print("Pressure: ");
+    myFile.println(pressure[count]);
+    myFile.print("Humidity: ");
+    myFile.print(humidity[count]);
+    myFile.flush();
+    myFile.close();
+    Serial.println("Done writing to file.");
+  } else {
+    Serial.println("File already exists.");
+  }
+
+  // Prepare to transmit after certain number of readings.
   if (count < readings - 1){
     count ++;
   }
@@ -180,8 +209,8 @@ void loop() {
     message[2] = (long) t >> 8;
     message[3] = (long) t;
     //Diff (2)
-    message[4] = (int) period >> 8;
-    message[5] = (int) period;
+    message[4] = (int) transmitPeriod >> 8;
+    message[5] = (int) transmitPeriod;
     for (int i = 0; i < readings; i++)
    {    
     //Distance
@@ -213,6 +242,6 @@ void loop() {
     isbd.sendSBDBinary(message, payload);
     Serial.println("Sent");
   }
-  delay(1000L*period*60);
+  delay(1000L*transmitPeriod*60);
   //delay(500);
 }
