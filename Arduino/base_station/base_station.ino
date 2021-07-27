@@ -129,6 +129,9 @@ void setup() {
   Serial.println();
 }
 
+// Macro should work with floats and doubles
+#define float_to_int(x) (x >= 0 ? (int)(x + 0.5) : (int)(x - 0.5))
+
 String Unixfile(String U)
 {
   char Name[12] = {0};
@@ -149,6 +152,9 @@ void loop() {
   Serial.print("Recording measurement: ");
   Serial.println(count);
   if(count == 0){t = rtc.now().unixtime();}
+  Serial.print("t: ");
+  Serial.print(t);
+  Serial.print("\n");
   Serial.println(pulseIn(sonarPin, HIGH));
   cm1 = pulseIn(sonarPin, HIGH)/57.87;
   Serial.print("Sonar measurement #1: ");
@@ -165,17 +171,17 @@ void loop() {
   Serial.println(dist[count]);
   
   sensors.requestTemperatures();
-  water_temp[count] = (int) sensors.getTempCByIndex(0)* 100;
+  water_temp[count] = float_to_int(sensors.getTempCByIndex(0)* 100);
   Serial.print("Water Temp: ");
   Serial.println(water_temp[count]);
 
-  air_temp[count] = (int) bme.readTemperature() * 100;
+  air_temp[count] = float_to_int(bme.readTemperature() * 100);
   Serial.print("Air Temp: ");
   Serial.println(air_temp[count]);
-  humidity[count] = (int) bme.readHumidity() * 100;
+  humidity[count] = float_to_int(bme.readHumidity() * 100);
   Serial.print("Humidity: ");
   Serial.println(humidity[count]);
-  pressure[count] = (int) bme.readPressure();
+  pressure[count] = float_to_int(bme.readPressure());
   Serial.print("Pressure: ");
   Serial.println(pressure[count]);
 
