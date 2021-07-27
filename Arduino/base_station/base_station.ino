@@ -64,9 +64,13 @@ void setup() {
     delay(1);  // for Leonardo/Micro/Zero
   }
   delay(1000);
-  Serial.println("Serial started"); 
-  rtc.begin();
-  Serial.println("Clock Started.");
+  Serial.println("Serial started");
+
+  if (!rtc.begin()) {
+    Serial.println("Clock not started.");
+  } else {
+    Serial.println("Clock started.");
+  }
   
   sensors.begin();
 
@@ -109,7 +113,7 @@ void setup() {
   DateTime now = rtc.now();
   Serial.print(now.year(), DEC);
   Serial.print('-');
-  Serial.print(now.month() + 1, DEC);
+  Serial.print(now.month(), DEC);
   Serial.print('-');
   Serial.print(now.day(), DEC);
   Serial.print(" ");
@@ -175,21 +179,29 @@ void loop() {
   Serial.print("Pressure: ");
   Serial.println(pressure[count]);
 
+  // Write to Micro SD Card.
+  // Formatted in JSON.
   String file = Unixfile(String(rtc.now().unixtime()));
   if (!SD.exists(file)) {
     Serial.println(rtc.now().unixtime());
     Serial.println(file);
     myFile = SD.open(file, FILE_WRITE);
-    myFile.print("Sonar: ");
-    myFile.println(dist[count]);
-    myFile.print("Water temp: ");
-    myFile.println(water_temp[count]);
-    myFile.print("Air temp: ");
-    myFile.println(air_temp[count]);
-    myFile.print("Pressure: ");
-    myFile.println(pressure[count]);
-    myFile.print("Humidity: ");
+    myFile.print("{\n");
+    myFile.print("\"sonar\": \"");
+    myFile.print(dist[count]);
+    myFile.print("\",\n");
+    myFile.print("\"waterTemp\": \"");
+    myFile.print(water_temp[count]);
+    myFile.print("\",\n");
+    myFile.print("\"airTemp\": \"");
+    myFile.print(air_temp[count]);
+    myFile.print("\",\n");
+    myFile.print("\"pressure\": \"");
+    myFile.print(pressure[count]);
+    myFile.print("\",\n");
+    myFile.print("\"humidity\": \"");
     myFile.print(humidity[count]);
+    myFile.print("\",\n");
     myFile.flush();
     myFile.close();
     Serial.println("Done writing to file.");
