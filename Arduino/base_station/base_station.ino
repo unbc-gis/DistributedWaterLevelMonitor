@@ -8,8 +8,16 @@
 //Climate Data: Adafruit BME280           | SCK(20), SDO(N/A), SDI(21), CS(N/A)     | https://www.adafruit.com/product/2652
 //Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
 
+// Macro should work with any floating point style number
+#define float_to_int(x) (x >= 0 ? (int)(x + 0.5) : (int)(x - 0.5))
+
+// For best results recordPeriod should be a clean divisor of transmitPeriod.
 #define transmitPeriod 360 // In minutes 
-#define recordPeriod 10 // In minutes
+#define recordPeriod 60 // In minutes
+
+// We will use the above to calculate the number of readings before we send
+// the readings via Sat Comm.
+const unsigned int readings = float_to_int(transmitPeriod / recordPeriod);
 
 #include <avr/sleep.h>
 #include "RTClib.h"
@@ -24,17 +32,17 @@
 #include "IridiumSBD.h"
 
 
-#define readings 4
+//#define readings 4
 #define rLength 10
 #define payload 6 + readings * rLength
 
 
 struct tm isbd_time;
-long t;
-#define INTERRUPT_PIN 3
-#define sonarPin 9
-#define ONE_WIRE_BUS 2 //Water Temp Sensor
-#define SDPin 53 //SD Card Select Pin
+long t; // Stores time values
+#define INTERRUPT_PIN 3 // Used for RTC Countdown Timer
+#define SONAR_PIN 9 // Sonar Sensor
+#define ONE_WIRE_BUS 2 // Water Temp Sensor
+#define SD_PIN 53 //SD Card Select Pin
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
 int sonar[3], dist[readings];
@@ -55,6 +63,19 @@ Adafruit_BME280 bme; // I2C
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO,  BME_SCK);  // Software SPI
 //Adafruit_BME280 bme(BME_CS);  // Hardware SPI
 
+RTC_PCF8523 rtc;
+
+void goToSleep()
+{
+  Serial.println("Sleeping...");
+  sleep_enable();
+  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
+  rtc.enableCountdownTimer(PCF8523_FrequencySecond, recordPeriod);
+  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), wakeUp, LOW);
+  delay(1000); // Helps to ensure that any writes or serial prints finish before sleeping.
+  sleep_cpu();
+}
+
 void wakeUp()
 {
   Serial.println("Awake!");
@@ -62,37 +83,34 @@ void wakeUp()
   detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN));
 }
 
-RTC_PCF8523 rtc;
-
 void setup() {
   digitalWrite(8, LOW);
   Serial.begin(19200);
   Serial1.begin(19200);
   Serial1.begin(19200);
+
   while (!Serial) {
     delay(1);  // for Leonardo/Micro/Zero
   }
   delay(1000);
   Serial.println("Serial started");
 
+  Serial.print("Number of readings: ");
+  Serial.println(readings);
+
+  // Required for RTC to coundown each reading interval.
+  // Interrupt pin should be pulled up to HIGH until we need to wake
+  // the Arduino fom sleep mode via the countdown timer. (Countdown
+  // timer drops voltage from HIGH to LOW at the end of each interval).
+  pinMode(INTERRUPT_PIN, INPUT_PULLUP);
+  delay(1000);
+  rtc.deconfigureAllTimers();
+
   if (!rtc.begin()) {
     Serial.println("Clock not started.");
   } else {
     Serial.println("Clock started.");
   }
-
-  pinMode(INTERRUPT_PIN, INPUT_PULLUP);
-  delay(1000);
-
-  Serial.println("Sleeping...");
-  // Put the Arduino to sleep.
-  sleep_enable();
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  rtc.deconfigureAllTimers();
-  rtc.enableCountdownTimer(PCF8523_FrequencySecond, 10);
-  attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), wakeUp, LOW);
-  delay(1000); // Helps to ensure that any writes or serial prints finish before sleeping.
-  sleep_cpu();
 
   sensors.begin();
 
@@ -104,8 +122,8 @@ void setup() {
   }
 
   //Initialize Adafruit Micro SD Breakout+
-  pinMode(SDPin, OUTPUT);
-  sdIsInit = SD.begin(SDPin);
+  pinMode(SD_PIN, OUTPUT);
+  sdIsInit = SD.begin(SD_PIN);
   if (!sdIsInit) {
     Serial.println("Micro SD Card Reader could not initialize.");
   } else {
@@ -152,9 +170,6 @@ void setup() {
   Serial.println();
 }
 
-// Macro should work with floats and doubles
-#define float_to_int(x) (x >= 0 ? (int)(x + 0.5) : (int)(x - 0.5))
-
 void insertion_sort(int *arr, size_t arr_size)
 {
   int i = 1;
@@ -178,7 +193,7 @@ void swap(int *arr, int i, int j)
 int median(int arr[], size_t arr_size)
 {
   insertion_sort(arr, arr_size);
-  if (arr_size & 1) { // Bitwise check for odd number (faster than x % 2 == 0)
+  if (arr_size % 2 == 0) {
     return arr[(arr_size) / 2];
   } else {
     return float_to_int((arr[(arr_size / 2) - 1] + arr[(arr_size / 2) + 1]) / 2.0f);
@@ -186,7 +201,7 @@ int median(int arr[], size_t arr_size)
 }
 
 // Memory card formatted as FAT32, so this function produces a
-// file name using 8.3 naming format (otherwise we will surpass amount name quickly).
+// file name using the "8.3 naming format".
 String Unixfile(String U)
 {
   char Name[12] = {0};
@@ -206,20 +221,22 @@ String Unixfile(String U)
 void loop() {
   Serial.print("Recording measurement: ");
   Serial.println(count);
+
+  // TODO: I don't think we need this t here anymore?
   if (count == 0) {
     t = rtc.now().unixtime();
   }
   Serial.print("t: ");
   Serial.print(t);
   Serial.print("\n");
-  Serial.println(pulseIn(sonarPin, HIGH));
-  sonar[0] = pulseIn(sonarPin, HIGH) / 57.87;
+  Serial.println(pulseIn(SONAR_PIN, HIGH));
+  sonar[0] = pulseIn(SONAR_PIN, HIGH) / 57.87;
   Serial.print("Sonar measurement #1: ");
   Serial.println(sonar[0]);
-  sonar[1] = pulseIn(sonarPin, HIGH) / 57.87;
+  sonar[1] = pulseIn(SONAR_PIN, HIGH) / 57.87;
   Serial.print("Sonar measurement #2: ");
   Serial.println(sonar[1]);
-  sonar[2] = pulseIn(sonarPin, HIGH) / 57.87;
+  sonar[2] = pulseIn(SONAR_PIN, HIGH) / 57.87;
   Serial.print("Sonar measurement #3: ");
   Serial.println(sonar[2]);
   // TODO: Change this to take the median value.
@@ -257,13 +274,28 @@ void loop() {
 
   // Write to Micro SD Card.
   // Formatted in JSON.
-  String file = Unixfile(String(rtc.now().unixtime()));
+  DateTime now = rtc.now();
+  String file = Unixfile(String(now.unixtime()));
+  
   if (sdIsInit) {
+    if (!SD.exists("/" + String(now.toString("YYYYMM")))) {
+      Serial.println("Directory for YYYYMM does not exist on SD Card. Creating...");
+      SD.mkdir(now.toString("YYYYMM"));
+    } else {
+      Serial.println("Found directory on SD Card.");
+    }
+    
     if (!SD.exists(file)) {
-      Serial.println(rtc.now().unixtime());
-      Serial.println(file);
-      myFile = SD.open(file, FILE_WRITE);
+      Serial.print("Writing to: ");
+      Serial.println("/" + String(now.toString("YYYYMM")) + "/" + file);
+      myFile = SD.open("/" + String(now.toString("YYYYMM")) + "/" + file, FILE_WRITE);
       myFile.print("{\n");
+      myFile.print("\t\"iso8601Timestamp\": \"");
+      myFile.print(now.timestamp());
+      myFile.print("\",\n");
+      myFile.print("\t\"unixTimestamp\": \"");
+      myFile.print(now.unixtime());
+      myFile.print("\",\n");
       myFile.print("\t\"sonar\": \"");
       myFile.print(dist[count]);
       myFile.print("\",\n");
@@ -278,7 +310,7 @@ void loop() {
       myFile.print("\",\n");
       myFile.print("\t\"humidity\": \"");
       myFile.print(humidity[count]);
-      myFile.print("\",\n");
+      myFile.print("\"\n");
       myFile.print("}");
       myFile.flush();
       myFile.close();
@@ -296,45 +328,46 @@ void loop() {
   }
   else {
     count = 0;
-    //Time (4)
-    message[0] = (long) t >> 24;
-    message[1] = (long) t >> 16;
-    message[2] = (long) t >> 8;
-    message[3] = (long) t;
-    //Diff (2)
-    message[4] = (int) transmitPeriod >> 8;
-    message[5] = (int) transmitPeriod;
-    for (int i = 0; i < readings; i++)
-    {
-      //Distance
-      message[6 + (i * rLength)] = (int) dist[i] >> 8;
-      message[7 + (i * rLength)] = (int) dist[i];
-      //Water Temp
-      message[8 + (i * rLength)] = (int) water_temp[i] >> 8;
-      message[9 + (i * rLength)] = (int) water_temp[i];
-      //Air Temp
-      message[10 + (i * rLength)] = (int) air_temp[i] >> 8;
-      message[11 + (i * rLength)] = (int) air_temp[i];
-      //Humidity
-      message[12 + (i * rLength)] = (int) humidity[i] >> 8;
-      message[13 + (i * rLength)] = (int) humidity[i];
-      //Pressure
-      message[14 + (i * rLength)] = (int) pressure[i] >> 8;
-      message[15 + (i * rLength)] = (int) pressure[i];
-    }
-    Serial.print("Sending Message: ");
-    for (int i = 0; i < payload; i += 2) {
-      char buff[2];
-      sprintf(buff, "%02X", message[i]);
-      Serial.print(buff);
-      sprintf(buff, "%02X", message[i + 1]);
-      Serial.print(buff);
-      //Serial.print(" ");
-    }
-    Serial.println();
-    isbd.sendSBDBinary(message, payload);
-    Serial.println("Sent");
+    Serial.println("Final reading before count = 0.");
+//    //Time (4)
+//    message[0] = (long) t >> 24;
+//    message[1] = (long) t >> 16;
+//    message[2] = (long) t >> 8;
+//    message[3] = (long) t;
+//    //Diff (2)
+//    message[4] = (int) transmitPeriod >> 8;
+//    message[5] = (int) transmitPeriod;
+//    for (int i = 0; i < readings; i++)
+//    {
+//      //Distance
+//      message[6 + (i * rLength)] = (int) dist[i] >> 8;
+//      message[7 + (i * rLength)] = (int) dist[i];
+//      //Water Temp
+//      message[8 + (i * rLength)] = (int) water_temp[i] >> 8;
+//      message[9 + (i * rLength)] = (int) water_temp[i];
+//      //Air Temp
+//      message[10 + (i * rLength)] = (int) air_temp[i] >> 8;
+//      message[11 + (i * rLength)] = (int) air_temp[i];
+//      //Humidity
+//      message[12 + (i * rLength)] = (int) humidity[i] >> 8;
+//      message[13 + (i * rLength)] = (int) humidity[i];
+//      //Pressure
+//      message[14 + (i * rLength)] = (int) pressure[i] >> 8;
+//      message[15 + (i * rLength)] = (int) pressure[i];
+//    }
+//    Serial.print("Sending Message: ");
+//    for (int i = 0; i < payload; i += 2) {
+//      char buff[2];
+//      sprintf(buff, "%02X", message[i]);
+//      Serial.print(buff);
+//      sprintf(buff, "%02X", message[i + 1]);
+//      Serial.print(buff);
+//      //Serial.print(" ");
+//    }
+//    Serial.println();
+//    isbd.sendSBDBinary(message, payload);
+//    Serial.println("Sent");
   }
-  delay(1000L * transmitPeriod * 60);
-  //delay(500);
+//  delay(1000L * transmitPeriod * 60);
+  goToSleep();
 }
