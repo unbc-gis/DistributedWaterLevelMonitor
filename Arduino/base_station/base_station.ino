@@ -1,7 +1,7 @@
 //Arduino Micro
 //Sonar Sensor: MaxBotix MB7052-100       | Data Pin 9                              | https://www.maxbotix.com/articles/095.htm
 //RTC: PCF 8523                           | SDA(Pin 2), SCL(Pin 3), Wake(Pin 4)     | https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino
-//SD-Card: Adafruit Micro-SD Breakout+    | Pin MISO, MSIO, SLCK, 7                 | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction
+//SD-Card: Adafruit Micro-SD Breakout+    | Pin MISO, MSIO, SLCK, 6                 | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction
 //Water Temp: Adafruit DS18B20            | Pin 2                                   | https://www.adafruit.com/product/381
 //Climate Data: Adafruit BME280           | SCK(20), SDO(N/A), SDI(21), CS(N/A)     | https://www.adafruit.com/product/2652
 //Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
@@ -40,29 +40,34 @@ const unsigned int totalReadings = (int)(ceil(transmitPeriod / (float)recordPeri
 #define rLength 10
 #define payload 6 + transmitReadings * rLength
 
+// set up variables using the SD utility library functions:
+Sd2Card card;
+SdVolume volume;
+SdFile root;
+
 
 /* Arduino Pins */
 
 //struct tm isbd_time;
-#define INTERRUPT_PIN 3 // Used for RTC Countdown Timer
-#define SONAR_PIN 9     // Sonar Sensor
-#define ONE_WIRE_BUS 2  // Water Temp Sensor
+#define INTERRUPT_PIN 5 // Used for RTC Countdown Timer
+#define SONAR_PIN 4     // Sonar Sensor
+#define ONE_WIRE_BUS 3  // Water Temp Sensor
 #define SD_PIN_CS 53    // SD Card Select Pin
-#define SD_PIN_CD 4     // SD Card Card Detect Pin
-#define BME_SCK 52
-#define BME_MISO 50
-#define BME_MOSI 51 
-#define BME_CS 49       // BME280 SPI Pin
+#define SD_PIN_CD 6     // SD Card Card Detect Pin
+//#define BME_SCK 52
+//#define BME_MISO 50
+//#define BME_MOSI 51 
+//#define BME_CS 49       // BME280 SPI Pin
 
 
 /* Sensor Module Data Structures */
 
-IridiumSBD isbd(Serial1, 8);
+IridiumSBD isbd(Serial1, 2);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-//Adafruit_BME280 bme; // I2C
+Adafruit_BME280 bme; // I2C
 //Adafruit_BME280 bme(BME_CS); // hardware SPI
-Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
+//Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 RTC_PCF8523 rtc;
 
 
@@ -77,6 +82,7 @@ int currentReadingInterval = 0;
 int readingIntervals[transmitReadings] = {0};
 byte message[payload];
 bool sdIsInit = false;
+struct tm isbd_time;
 DateTime currentTime;
 
 
@@ -136,7 +142,7 @@ void setup() {
   digitalWrite(8, LOW);
 
   // Begin debugging I/O
-  Serial.begin(19200);
+  Serial.begin(9600);
 
   // Begin serial TX/RX for Sat Module.
   Serial1.begin(19200);
@@ -176,8 +182,8 @@ void setup() {
   Serial.println("Adafruit DS18B20 inititalized.");
 
   // Initialize BME280
-//  if (!bme.begin(0x76)) { // I2C
-  if (!bme.begin()) { // SPI
+  if (!bme.begin(0x77)) { // I2C
+  //if (!bme.begin()) { // SPI
     Serial.println("Could not find BME280 Climate Sensor.");
   } else {
     Serial.println("BME820 Climate Sensor initialized.");
@@ -185,7 +191,7 @@ void setup() {
 
   // Initialize Adafruit Micro SD Breakout+
   pinMode(SD_PIN_CS, OUTPUT);
-  sdIsInit = SD.begin(SD_PIN_CS);
+  sdIsInit = card.init(SPI_HALF_SPEED, SD_PIN_CS);
   if (!sdIsInit) {
     Serial.println("Micro SD Card Reader could not initialize.");
   } else {
@@ -195,24 +201,26 @@ void setup() {
   pinMode(SD_PIN_CD, INPUT_PULLUP);
 
   Serial.println("Debug 0");
-  isbd.useMSSTMWorkaround(false);
-  isbd.begin();
 
-  Serial.println("Debug 1");
-  //First sensor reading always wrong so lets get it out of the way
+   //First sensor reading always wrong so lets get it out of the way
   sensors.requestTemperatures();
 
   bme.readTemperature();
   bme.readHumidity();
   bme.readPressure();
+  
+  isbd.useMSSTMWorkaround(false);
+  isbd.begin();
+  Serial.println("Debug 1");
+ 
 
   Serial.println("Sat Comms Started");
   Serial.print("Getting current time");
-  //  while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
-  //    delay(1000);
-  //    Serial.print(".");
-  //  }
-  //  Serial.println();
+  while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
+    delay(1000);
+    Serial.print(".");
+  }
+  Serial.println("Debug 2");
   //  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
   //  Serial.println("Clock Set to ");
 
@@ -285,6 +293,7 @@ void setup() {
   }
 
   void loop() {
+    Serial.println("Loop!");
     currentTime = rtc.now();
     int sonar[3], sonar_dist;
     int water_temp, air_temp, humidity, pressure;
