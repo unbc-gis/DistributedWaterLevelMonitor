@@ -49,7 +49,10 @@ const unsigned int totalReadings = (int)(ceil(transmitPeriod / (float)recordPeri
 #define ONE_WIRE_BUS 2  // Water Temp Sensor
 #define SD_PIN_CS 53    // SD Card Select Pin
 #define SD_PIN_CD 4     // SD Card Card Detect Pin
-
+#define BME_SCK 52
+#define BME_MISO 50
+#define BME_MOSI 51 
+#define BME_CS 49       // BME280 SPI Pin
 
 
 /* Sensor Module Data Structures */
@@ -57,7 +60,9 @@ const unsigned int totalReadings = (int)(ceil(transmitPeriod / (float)recordPeri
 IridiumSBD isbd(Serial1, 8);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-Adafruit_BME280 bme; // I2C
+//Adafruit_BME280 bme; // I2C
+//Adafruit_BME280 bme(BME_CS); // hardware SPI
+Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 RTC_PCF8523 rtc;
 
 
@@ -171,7 +176,8 @@ void setup() {
   Serial.println("Adafruit DS18B20 inititalized.");
 
   // Initialize BME280
-  if (!bme.begin(0x76)) {
+//  if (!bme.begin(0x76)) { // I2C
+  if (!bme.begin()) { // SPI
     Serial.println("Could not find BME280 Climate Sensor.");
   } else {
     Serial.println("BME820 Climate Sensor initialized.");
