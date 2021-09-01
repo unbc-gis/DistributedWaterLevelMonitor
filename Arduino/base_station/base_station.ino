@@ -27,8 +27,8 @@
 /* Time Periods */
 
 // For best results recordPeriod should be a clean divisor of transmitPeriod.
-#define transmitPeriod 4 // In minutes
-#define recordPeriod 1 // In minutes
+#define transmitPeriod 12 // In minutes
+#define recordPeriod 3 // In minutes
 
 // We will use the above to calculate the number of readings before to record
 // to the SD card. "transmitReadings" macro below defines how many will be sent
@@ -49,9 +49,9 @@ SdFile root;
 /* Arduino Pins */
 
 //struct tm isbd_time;
-#define INTERRUPT_PIN 5 // Used for RTC Countdown Timer
-#define SONAR_PIN 4     // Sonar Sensor
-#define ONE_WIRE_BUS 3  // Water Temp Sensor
+#define INTERRUPT_PIN 3 // Used for RTC Countdown Timer
+#define SONAR_PIN 9     // Sonar Sensor
+#define ONE_WIRE_BUS 5  // Water Temp Sensor
 #define SD_PIN_CS 53    // SD Card Select Pin
 #define SD_PIN_CD 6     // SD Card Card Detect Pin
 //#define BME_SCK 52
@@ -83,6 +83,7 @@ int readingIntervals[transmitReadings] = {0};
 byte message[payload];
 bool sdIsInit = false;
 struct tm isbd_time;
+char isbdbuffer[32];
 DateTime currentTime;
 
 
@@ -110,7 +111,7 @@ void goToSleep()
   // timer but not everything prints out on the serial before the Arduino goes to sleep.
   // Good to enable for debugging purposes.
 
-  //  delay(1000); // Helps to ensure that any writes or serial prints finish before sleeping.
+    delay(1000); // Helps to ensure that any writes or serial prints finish before sleeping.
   sleep_cpu();
 }
 
@@ -119,6 +120,13 @@ void wakeUp()
   Serial.println("Awake!");
   sleep_disable();
   detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN));
+}
+
+int checkI2cDeviceStatus(int address) {
+  Wire.beginTransmission(address);
+  unsigned int error = Wire.endTransmission();
+
+  return error;
 }
 
 void printTime()
@@ -139,10 +147,12 @@ void printTime()
 }
 
 void setup() {
+  Wire.begin();
+  
   digitalWrite(8, LOW);
 
   // Begin debugging I/O
-  Serial.begin(9600);
+  Serial.begin(19200);
 
   // Begin serial TX/RX for Sat Module.
   Serial1.begin(19200);
@@ -171,11 +181,11 @@ void setup() {
   //  rtc.deconfigureAllTimers();
 
 //  // Initialize PCF8523
-//  if (!rtc.begin()) {
-//    Serial.println("Clock not started.");
-//  } else {
-//    Serial.println("Clock started.");
-//  }
+  if (!rtc.begin()) {
+    Serial.println("Clock not started.");
+  } else {
+    Serial.println("Clock started.");
+  }
 
   // Initialize Adafruit DS18B20
   sensors.begin();
@@ -191,35 +201,49 @@ void setup() {
 
   // Initialize Adafruit Micro SD Breakout+
   pinMode(SD_PIN_CS, OUTPUT);
-  sdIsInit = card.init(SPI_HALF_SPEED, SD_PIN_CS);
+  sdIsInit = SD.begin(SD_PIN_CS);
   if (!sdIsInit) {
     Serial.println("Micro SD Card Reader could not initialize.");
   } else {
     Serial.println("Micro SD Card Reader initalized.");
   }
 
+  // Pin used to check if SD Card is inserted. Pulls up to high when not
+  // inserted and low when inserted.
   pinMode(SD_PIN_CD, INPUT_PULLUP);
-
-  Serial.println("Debug 0");
 
    //First sensor reading always wrong so lets get it out of the way
   sensors.requestTemperatures();
-
   bme.readTemperature();
   bme.readHumidity();
   bme.readPressure();
-  
+
   isbd.useMSSTMWorkaround(false);
-  isbd.begin();
-  Serial.println("Debug 1");
- 
+  if (isbd.begin() != ISBD_SUCCESS) {
+    Serial.println("RockBLOCK could not intialize.");
+  } else {
+    Serial.println("RockBLOCK initialized.");
+  }
 
   Serial.println("Sat Comms Started");
-  Serial.print("Getting current time");
-  while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
-    delay(1000);
-    Serial.print(".");
+  Serial.println("Getting current time");
+//  while(isbd.getSystemTime(isbd_time) != ISBD_SUCCESS){
+//    delay(1000);
+//    Serial.print(".");
+//  }
+
+  int err = isbd.getSystemTime(isbd_time);
+  if (err == ISBD_SUCCESS) {
+    
+    sprintf(isbdbuffer, "%d-%02d-%02d %02d:%02d:%02d",
+       isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
+       isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec);
+    Serial.print("Iridium time/date is ");
+    Serial.println(isbdbuffer);
+  } else {
+    Serial.println("Couldn't get ISBD time.");
   }
+
   Serial.println("Debug 2");
   //  rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday, isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
   //  Serial.println("Clock Set to ");
@@ -294,6 +318,7 @@ void setup() {
 
   void loop() {
     Serial.println("Loop!");
+    
     currentTime = rtc.now();
     int sonar[3], sonar_dist;
     int water_temp, air_temp, humidity, pressure;
@@ -324,21 +349,6 @@ void setup() {
 
     pressure = floatToInt(bme.readPressure());
     Serial.println("Pressure: " + String(pressure));
-
-    // TODO: Check if this should be filled into payload variables.
-    // payload_sonar_dist[payload_reading_count] = sonar_dist;
-    // payload_water_temp[count] = water_temp;
-    // etc.
-
-    // (count + 1)*(int(totalReadings / 4))
-    // + ((count + 1)
-    // if (count < (totalReadings % transmitReadings))
-    // else (totalReadings % transmitReadings))
-    //  if (transmitPeriod % recordPeriod == 0) {
-    //
-    //  } else {
-    //    index = (totalReadings / 4) - 1;
-    //  }
 
     Serial.println("Count: " + String(count));
     Serial.println("Current reading interval: " + String(readingIntervals[currentReadingInterval] - 1));
@@ -383,6 +393,9 @@ void setup() {
         myFile.print("{\n");
         myFile.print("\t\"iso8601Timestamp\": \"");
         myFile.print(currentTime.timestamp());
+        myFile.print("\",\n");
+        myFile.print("\t\"ISBD Time\": \"");
+        myFile.print(isbdbuffer);
         myFile.print("\",\n");
         myFile.print("\t\"unixTimestamp\": \"");
         myFile.print(currentTime.unixtime());
@@ -475,5 +488,9 @@ void setup() {
       }
     }
     //  delay(1000L * transmitPeriod * 60);
-    goToSleep();
+    if (!checkI2cDeviceStatus(0x68)) {
+      goToSleep();
+    } else {
+      delay(1000L * transmitPeriod * 60);
+    }
   }
