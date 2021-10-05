@@ -82,8 +82,6 @@ int currentReadingInterval = 0;
 int readingIntervals[transmitReadings] = {0};
 byte message[payload];
 bool sdIsInit = false;
-struct tm isbd_time;
-char isbdbuffer[32];
 DateTime currentTime;
 
 
@@ -157,6 +155,9 @@ void setup() {
   // Begin serial TX/RX for Sat Module.
   Serial1.begin(19200);
 
+  // Tried this to see if it would fix time issues with the sat module
+  //  isbd.setPowerProfile(IridiumSBD::USB_POWER_PROFILE);
+
   while (!Serial) {
     delay(1);  // for Leonardo/Micro/Zero
   }
@@ -218,12 +219,13 @@ void setup() {
   bme.readHumidity();
   bme.readPressure();
 
-  if (isbd.begin() != ISBD_SUCCESS) {
+  int isbd_err = isbd.begin();
+  if (isbd_err != ISBD_SUCCESS) {
     Serial.println("RockBLOCK could not intialize.");
   } else {
     Serial.println("RockBLOCK initialized.");
   }
-  isbd.useMSSTMWorkaround(false);
+//  isbd.useMSSTMWorkaround(false);
 
   Serial.println("Sat Comms Started");
   Serial.println("Getting current time");
@@ -306,6 +308,9 @@ String convertToFat32CompatibleName(String U)
 
 void loop() {
   Serial.println("Loop!");
+
+  struct tm isbd_time;
+  char isbdbuffer[32];
 
   int isdb_err = isbd.getSystemTime(isbd_time);
   Serial.println("ISBD Error Code: " + String(isdb_err));
