@@ -308,78 +308,62 @@ String convertToFat32CompatibleName(String U)
 
 void loop() {
   Serial.println("Loop!");
-
-  struct tm isbd_time;
-  char isbdbuffer[32];
-
-  int isdb_err = isbd.getSystemTime(isbd_time);
-  Serial.println("ISBD Error Code: " + String(isdb_err));
-  if (isdb_err == ISBD_SUCCESS) {
-    sprintf(isbdbuffer, "%d-%02d-%02d %02d:%02d:%02d",
-       isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
-       isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec);
-    Serial.print("Iridium time/date is ");
-    Serial.println(isbdbuffer);
-    rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
-       isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
-  } else {
-    Serial.println("Couldn't get ISBD time.");
-  }
   
   currentTime = rtc.now();
   int sonar[3], sonar_dist;
   int water_temp, air_temp, humidity, pressure;
 
-  Serial.println("Date/Time: " + currentTime.timestamp());
-  Serial.println("Taking measurement every " + String(recordPeriod) + " minutes");
-  Serial.println("Transmitting every " + String(transmitPeriod) + " minutes");
-  Serial.println("Recording measurement #:" + String(count));
+  Serial.print("Date/Time according to RTC: " + currentTime.timestamp() + "; ");
+  Serial.print("Taking measurement every " + String(recordPeriod) + " minutes" + "; ");
+  Serial.print("Transmitting every " + String(transmitPeriod) + " minutes" + "; ");
+  Serial.print("Recording measurement #:" + String(count) + "; ");
+
+  Serial.println();
 
   sonar[0] = pulseIn(SONAR_PIN, HIGH) / 57.87;
-  Serial.println("Sonar measurement #1: " + String(sonar[0]));
   sonar[1] = pulseIn(SONAR_PIN, HIGH) / 57.87;
-  Serial.println("Sonar measurement #2: " + String(sonar[1]));
   sonar[2] = pulseIn(SONAR_PIN, HIGH) / 57.87;
-  Serial.println("Sonar measurement #3: " + String(sonar[2]));
   sonar_dist = median(sonar, 3);
-  Serial.println("Sonar average (median): " + String(sonar_dist));
+  Serial.print("Sonar measurements: " + String(sonar[0]) + ", "
+      + String(sonar[1]) + ", " + String(sonar[2]) + ", med: " + String(sonar_dist)+ "; ");
 
   sensors.requestTemperatures();
   water_temp = floatToInt(sensors.getTempCByIndex(0) * 100);
-  Serial.println("Water Temp: " + String(water_temp));
+  Serial.print("Water temp: " + String(water_temp) + "; ");
 
   air_temp = floatToInt(bme.readTemperature() * 100);
-  Serial.println("Air Temp: " + String(air_temp));
+  Serial.print("Air Temp: " + String(air_temp) + "; ");
 
   humidity = floatToInt(bme.readHumidity() * 100);
-  Serial.println("Humidity: " + String(humidity));
+  Serial.print("Humidity: " + String(humidity) + "; ");
 
   pressure = floatToInt(bme.readPressure());
-  Serial.println("Pressure: " + String(pressure));
+  Serial.print("Pressure: " + String(pressure) + "; ");
 
-  Serial.println("Count: " + String(count));
-  Serial.println("Current reading interval: " + String(readingIntervals[currentReadingInterval] - 1));
+  Serial.print("Count: " + String(count) + "; ");
+  Serial.print("Reading interval: " + String(readingIntervals[currentReadingInterval] - 1) + "; ");
 
   if (count == (readingIntervals[currentReadingInterval] - 1)) {
-    Serial.println("Writing payload reading #: " + String(count));
+//    Serial.println("Writing payload reading #: " + String(count));
     payload_sonar_dist[currentReadingInterval] = sonar_dist;
-    Serial.println("Sonar dist: " + String(sonar_dist));
-    Serial.println("Sonar dist: " + String(payload_sonar_dist[currentReadingInterval]));
+//    Serial.println("Sonar dist: " + String(sonar_dist));
+//    Serial.println("Sonar dist: " + String(payload_sonar_dist[currentReadingInterval]));
     payload_water_temp[currentReadingInterval] = water_temp;
-    Serial.println("Water temp: " + String(water_temp));
-    Serial.println("Water temp: " + String(water_temp));
+//    Serial.println("Water temp: " + String(water_temp));
+//    Serial.println("Water temp: " + String(water_temp));
     payload_air_temp[currentReadingInterval] = air_temp;
-    Serial.println("Air temp: " + String(air_temp));
-    Serial.println("Air temp: " + String(payload_air_temp[currentReadingInterval]));
+//    Serial.println("Air temp: " + String(air_temp));
+//    Serial.println("Air temp: " + String(payload_air_temp[currentReadingInterval]));
     payload_humidity[currentReadingInterval] = humidity;
-    Serial.println("Humidity: " + String(humidity));
-    Serial.println("Humidity: " + String(payload_humidity[currentReadingInterval]));
+//    Serial.println("Humidity: " + String(humidity));
+//    Serial.println("Humidity: " + String(payload_humidity[currentReadingInterval]));
     payload_pressure[currentReadingInterval] = pressure;
-    Serial.println("Pressure: " + String(pressure));
-    Serial.println("Pressure: " + String(payload_pressure[currentReadingInterval]));
+//    Serial.println("Pressure: " + String(pressure));
+//    Serial.println("Pressure: " + String(payload_pressure[currentReadingInterval]));
     currentReadingInterval++;
   }
 
+  Serial.println();
 
   // Write to Micro SD Card.
   // Formatted in JSON.
@@ -400,12 +384,6 @@ void loop() {
       myFile.print("{\n");
       myFile.print("\t\"iso8601Timestamp\": \"");
       myFile.print(currentTime.timestamp());
-      myFile.print("\",\n");
-      myFile.print("\t\"ISBD Time\": \"");
-      myFile.print(isbdbuffer);
-      myFile.print("\",\n");
-      myFile.print("\t\"ISBD Error Code\": \"");
-      myFile.print(isdb_err);
       myFile.print("\",\n");
       myFile.print("\t\"unixTimestamp\": \"");
       myFile.print(currentTime.unixtime());
@@ -500,10 +478,42 @@ void loop() {
       payload_pressure[i] = 0;
     }
 
+    struct tm isbd_time;
+    char isbdbuffer[32];
+    sprintf(isbdbuffer, "%d-%02d-%02d %02d:%02d:%02d",
+       isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
+       isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec);
 
+    Serial.print("Before tm change:" + String(isbdbuffer) + "; ");
+    int isdb_err = isbd.getSystemTime(isbd_time);
+    Serial.print("ISBD Error Code: " + String(isdb_err) + "; ");
+    if (isdb_err == ISBD_SUCCESS) {
+      sprintf(isbdbuffer, "%d-%02d-%02d %02d:%02d:%02d",
+         isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
+         isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec);
+      Serial.print("Iridium time/date is " + String(isbdbuffer) + "; ");
+      rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
+         isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
+      Serial.print("Adjusting RTC time to Iridium time.; ");
+    } else {
+      Serial.print("Err: Couldn't get ISBD time; ");
+    }
+  
+    Serial.println();
+  
     if (SD.exists("/" + String(currentTime.toString("YYYYMM")))) {
       Serial.println("File exists.");
       myFile = SD.open("/" + String(currentTime.toString("YYYYMM")) + "/" + file, FILE_WRITE);
+
+      myFile.print("\n\t\"ISBD Error Code\": \"");
+      myFile.print(isdb_err);
+      myFile.print("\",\n");
+
+      myFile.print("\t\"ISBD Time\": \"");
+      myFile.print(isbdbuffer);
+      myFile.print("\",\n");
+
+      
       myFile.print("\t\"Payload\": \"");
       
       for (int i = 0; i < payload; i += 2) {
@@ -530,12 +540,12 @@ void loop() {
   }
 }
 
-void ISBDConsoleCallback(IridiumSBD *device, char c)
-{
-  Serial.write(c);
-}
-
-void ISBDDiagsCallback(IridiumSBD *device, char c)
-{
-  Serial.write(c);
-}
+//void ISBDConsoleCallback(IridiumSBD *device, char c)
+//{
+//  Serial.write(c);
+//}
+//
+//void ISBDDiagsCallback(IridiumSBD *device, char c)
+//{
+//  Serial.write(c);
+//}
