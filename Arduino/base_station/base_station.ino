@@ -406,11 +406,9 @@ void loop() {
       myFile.print("\",\n");
       myFile.print("\t\"Humidity\": \"");
       myFile.print(humidity);
-      myFile.print("\"\n");
+      myFile.print("\",\n");
       myFile.print("\t\"Current Reading Interval\": \"");
       myFile.print(currentReadingInterval);
-      myFile.print("\"\n");
-      myFile.print("}");
       myFile.flush();
       myFile.close();
       Serial.println("Done writing to file.");
@@ -506,10 +504,10 @@ void loop() {
     Serial.println();
   
     if (SD.exists("/" + String(currentTime.toString("YYYYMM")))) {
-      Serial.println("File exists.");
       myFile = SD.open("/" + String(currentTime.toString("YYYYMM")) + "/" + file, FILE_WRITE);
 
-      myFile.print("\n\t\"ISBD Error Code\": \"");
+      myFile.print(",\n");
+      myFile.print("\t\"ISBD Error Code\": \"");
       myFile.print(isdb_err);
       myFile.print("\",\n");
 
@@ -528,12 +526,21 @@ void loop() {
         myFile.print(buff);
       
       }
-      myFile.print("\"\n");
       myFile.flush();
       myFile.close();
     } else {
       Serial.println("File does not exist.");
     }
+  }
+
+  if (SD.exists("/" + String(currentTime.toString("YYYYMM")))) {
+    myFile = SD.open("/" + String(currentTime.toString("YYYYMM")) + "/" + file, FILE_WRITE);
+    myFile.print("\"\n");
+    myFile.print("}");
+    myFile.flush();
+    myFile.close();
+  } else {
+    Serial.println("File does not exist.");
   }
 
   //  delay(1000L * transmitPeriod * 60);
