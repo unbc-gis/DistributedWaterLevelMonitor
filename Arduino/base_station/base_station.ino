@@ -19,10 +19,12 @@
 #include "IridiumSBD.h"
 #include <math.h>
 
+
 /* Preprocessor Macros */
 
 // Round a float to an int
 #define floatToInt(x) (x >= 0 ? (int)(x + 0.5) : (int)(x - 0.5))
+
 
 /* Time Periods */
 
@@ -144,6 +146,59 @@ void printTime()
   Serial.println();
 }
 
+// Insertion sort works well for low number of indices.
+void insertionSort(int *arr, size_t arr_size)
+{
+  int i = 1;
+  while (i < arr_size) {
+    int j = i;
+    while (j > 0 && arr[j - 1] > arr[j]) {
+      swap(arr, j, j - 1);
+      j--;
+    }
+    i++;
+  }
+}
+
+// Simple array swap.
+void swap(int *arr, int i, int j)
+{
+  int temp = arr[j];
+  arr[j] = arr[i];
+  arr[i] = temp;
+}
+
+// Find the median of a sorted array.
+int median(int arr[], size_t arr_size)
+{
+  insertionSort(arr, arr_size);
+  if (arr_size % 2 == 0) {
+    return floatToInt((arr[(arr_size / 2) - 1] + arr[(arr_size / 2) + 1]) / 2.0f);
+  } else {
+    return arr[(arr_size) / 2];
+  }
+}
+
+// Memory card formatted as FAT32, so this function produces a
+// file name using the "8.3 naming format". FAT32 can only support
+// the 8.3 naming format if not using special extensions that the
+// SD.h library does not seem to support.
+String convertToFat32CompatibleName(String U)
+{
+  char Name[12] = {0};
+  for (int i = 0; i < 7; i++)
+  {
+    Name[i] = U[i];
+  }
+  Name[7] = '.';
+  for (int i = 7; i < 10; i++)
+  {
+    Name[i + 1] = U[i];
+  }
+
+  return Name;
+}
+
 void setup() {
   Wire.begin();
   
@@ -253,58 +308,7 @@ void setup() {
   }
 }
 
-// Insertion sort works well for low number of indices.
-void insertionSort(int *arr, size_t arr_size)
-{
-  int i = 1;
-  while (i < arr_size) {
-    int j = i;
-    while (j > 0 && arr[j - 1] > arr[j]) {
-      swap(arr, j, j - 1);
-      j--;
-    }
-    i++;
-  }
-}
 
-// Simple array swap.
-void swap(int *arr, int i, int j)
-{
-  int temp = arr[j];
-  arr[j] = arr[i];
-  arr[i] = temp;
-}
-
-// Find the median of a sorted array.
-int median(int arr[], size_t arr_size)
-{
-  insertionSort(arr, arr_size);
-  if (arr_size % 2 == 0) {
-    return floatToInt((arr[(arr_size / 2) - 1] + arr[(arr_size / 2) + 1]) / 2.0f);
-  } else {
-    return arr[(arr_size) / 2];
-  }
-}
-
-// Memory card formatted as FAT32, so this function produces a
-// file name using the "8.3 naming format". FAT32 can only support
-// the 8.3 naming format if not using special extensions that the
-// SD.h library does not seem to support.
-String convertToFat32CompatibleName(String U)
-{
-  char Name[12] = {0};
-  for (int i = 0; i < 7; i++)
-  {
-    Name[i] = U[i];
-  }
-  Name[7] = '.';
-  for (int i = 7; i < 10; i++)
-  {
-    Name[i + 1] = U[i];
-  }
-
-  return Name;
-}
 
 void loop() {
   Serial.println("Loop!");
