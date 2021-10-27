@@ -494,9 +494,14 @@ void loop() {
          isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
          isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec);
       Serial.print("Iridium time/date is " + String(isbdbuffer) + "; ");
-      rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
-         isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
-      Serial.print("Adjusting RTC time to Iridium time.; ");
+
+      /* Disabling the section below for now because the RockBLOCK isn't giving us an accurate time.
+       * Tried troubleshooting for a few weeks now but have not narrowed down the issue. */
+
+      // rtc.adjust(DateTime(isbd_time.tm_year + 1900, isbd_time.tm_mon + 1, isbd_time.tm_mday,
+      //    isbd_time.tm_hour, isbd_time.tm_min, isbd_time.tm_sec));
+      // Serial.print("Adjusting RTC time to Iridium time.; ");
+
     } else {
       Serial.print("Err: Couldn't get ISBD time; ");
     }
