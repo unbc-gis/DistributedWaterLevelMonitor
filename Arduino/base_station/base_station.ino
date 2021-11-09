@@ -1,10 +1,11 @@
 //Arduino Micro
-//Sonar Sensor: MaxBotix MB7052-100       | Data Pin 9                              | https://www.maxbotix.com/articles/095.htm
-//RTC: PCF 8523                           | SDA(Pin 2), SCL(Pin 3), Wake(Pin 4)     | https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino
-//SD-Card: Adafruit Micro-SD Breakout+    | Pin MISO, MSIO, SLCK, 6                 | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction
-//Water Temp: Adafruit DS18B20            | Pin 2                                   | https://www.adafruit.com/product/381
-//Climate Data: Adafruit BME280           | SCK(20), SDO(N/A), SDI(21), CS(N/A)     | https://www.adafruit.com/product/2652
-//Communication: RockBLOCK 19354          | Sleep(pin 8) Comm(RX, TX)               | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
+//Sonar Sensor: MaxBotix MB7052-100       | Data (Pin 4)                                  | https://www.maxbotix.com/articles/095.htm
+//RTC: PCF 8523                           | SDA (Pin 20), SCL (Pin 21), Wake(Pin 3)       | https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino
+//SD-Card: Adafruit Micro-SD Breakout+    | MISO (Pin 50), MOSI (Pin 51), SCK (Pin 52),
+//                                          CS (Pin 53), Card Detect (Pin 6)              | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction
+//Water Temp: Adafruit DS18B20            | Pin 5                                         | https://www.adafruit.com/product/381
+//Climate Data: Adafruit BME280           | SCK (Pin 20), SDO(N/A), SDI (Pin 21), CS(N/A) | https://www.adafruit.com/product/2652
+//Communication: RockBLOCK 19354          | Sleep (Pin 2), TX (Pin 18), RX (Pin 19)       | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/
 
 #include <avr/sleep.h>
 #include "RTClib.h"
@@ -87,7 +88,9 @@ bool sdIsInit = false;
 DateTime currentTime;
 
 
-// Put Arduino to sleep.
+/**
+ * Put the Arduino to sleep.
+ */
 void goToSleep()
 {
   Serial.println("Sleeping...");
@@ -115,6 +118,9 @@ void goToSleep()
   sleep_cpu();
 }
 
+/**
+ * Wake the Arduino up from sleep.
+ */
 void wakeUp()
 {
   Serial.println("Awake!");
@@ -122,28 +128,14 @@ void wakeUp()
   detachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN));
 }
 
+/**
+ * Put the Arduino to sleep.
+ */
 int checkI2cDeviceStatus(int address) {
   Wire.beginTransmission(address);
   unsigned int error = Wire.endTransmission();
 
   return error;
-}
-
-void printTime()
-{
-  DateTime t = rtc.now();
-  Serial.print(t.toString("YYYY"));
-  Serial.print('-');
-  Serial.print(t.toString("MM"));
-  Serial.print('-');
-  Serial.print(t.toString("DD"));
-  Serial.print(" ");
-  Serial.print(t.toString("hh"));
-  Serial.print(':');
-  Serial.print(t.toString("mm"));
-  Serial.print(':');
-  Serial.print(t.toString("ss"));
-  Serial.println();
 }
 
 // Insertion sort works well for low number of indices.
@@ -160,7 +152,9 @@ void insertionSort(int *arr, size_t arr_size)
   }
 }
 
-// Simple array swap.
+/**
+ * Simple array swap.
+ */
 void swap(int *arr, int i, int j)
 {
   int temp = arr[j];
@@ -168,7 +162,9 @@ void swap(int *arr, int i, int j)
   arr[i] = temp;
 }
 
-// Find the median of a sorted array.
+/**
+ * Find the median of a sorted array.
+ */
 int median(int arr[], size_t arr_size)
 {
   insertionSort(arr, arr_size);
@@ -179,20 +175,22 @@ int median(int arr[], size_t arr_size)
   }
 }
 
-// Memory card formatted as FAT32, so this function produces a
-// file name using the "8.3 naming format". FAT32 can only support
-// the 8.3 naming format if not using special extensions that the
-// SD.h library does not seem to support.
+/**
+ * Memory card formatted as FAT32, so this function produces a
+ * file name using the "8.3 naming format". FAT32 can only support
+ * the 8.3 naming format if not using special extensions that the
+ * SD.h library does not seem to support.
+ */
 String convertToFat32CompatibleName(String U)
 {
   char Name[12] = {0};
-  for (int i = 0; i < 7; i++)
-  {
+  for (int i = 0; i < 7; i++) {
     Name[i] = U[i];
   }
+
   Name[7] = '.';
-  for (int i = 7; i < 10; i++)
-  {
+
+  for (int i = 7; i < 10; i++) {
     Name[i + 1] = U[i];
   }
 
