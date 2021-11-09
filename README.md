@@ -2,7 +2,7 @@
 Python Application for monitoring waterlevel at provincial scale
 
 Installation:
-Install postgresql and create a database and user, add login credentials to passwd.cred
+Install PostgreSQL and create a database and user, add login credentials to passwd.cred
 
 Add new deployment:
 Use the script addDeployment.py, setting the IMEI, Location and Mounting heigt, lines 5-7
@@ -10,26 +10,26 @@ Use the script addDeployment.py, setting the IMEI, Location and Mounting heigt, 
 # The Project
 This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests Lands and Natural Resourses. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
 
-The individual stations communicate via Rockblock satillite modems using the Iridium constilation, and are built using Arduino microcontrollers. By leveraging satillite communication, and low power monitoring tools, it is made practicle to deploy sensors in locations without existing cellular or radio ifrastructure and where it may be expensive for crews to access on a regular basis.
+The individual stations communicate via RockBLOCK satillite modems using the Iridium constellation, and are built using Arduino microcontrollers. By leveraging satellite communication, and low power monitoring tools, it is made practical to deploy sensors in locations without existing cellular or radio infrastructure, and where it may be expensive for crews to access on a regular basis.
 
-By placing all the data into a centeral database there are options opend for correlating measurements across watersheds, and viewing the same watercourse at differnt points.
+By placing all the data into a central database, there are options opened for correlating measurements across watersheds, and viewing the same watercourse at different points.
 
 ## The Station
-The station is built using an Arduino Microcontroller (Original prototype was Arduino Micro, however Arduino Mega is the recomened board as it contains sufficent storage space for SD card Library for more frequent logging).
+The station is built using an Arduino Microcontroller (original prototype was Arduino Micro, however Arduino Mega is the recommeneded board as it contains sufficent storage space for SD card Library for more frequent logging).
 
 The station makes use of the following sesors. 
 * MaxBotix MB7052-100 Ultrasonic Range Finder for water level monitoring
 * Adafruit DS18b20 for water temperature monitoring
 * Adafruit BME280 for weather monitoring (Temperature, Humidity, Pressure)
 
-Data transmission: RockBlock 19354
+Data transmission: RockBLOCK 19354
 Data Logging: Adafuit Micro-SD Breakout+
 Real time Clock: PCF 8523
-Power is provided by a car battery and a 6-36v to 5v voltage regulator
+Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
 
 ![Image of Station](https://github.com/GeoGuy-ca/DistributedWaterLevelMonitor/blob/master/photos/20200525_131511.jpg)
 
-The station is constructed inside of a reusable sealing food container, all components were hot glued to the lid of the container and then cables for external sensors were run through holes and sealed with silicon. 
+The station is constructed inside of a reusable sealing food container, all components were hot glued to the lid of the container and then cables for external sensors were run through holes and sealed with silicon.
 
 The water level sensor was attached to a 1x4, which was in tern screwed to the side of a bridge holding it at a steady position above the water.
 
