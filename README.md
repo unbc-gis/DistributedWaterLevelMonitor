@@ -43,12 +43,26 @@ The station makes use of the following sensors.
 * Real time Clock: PCF 8523
 * Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
 
+## PIns
+
+[//]: # (Talk about the pins, maybe have a photo of the Arduino board? Maybe trace the wires in the picture? I don't know how I want to do this yet.)
+
+| Sensor                                  | Pins                                                                         | Information                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Sonar Sensor: MaxBotix MB7052-100       | Data (Pin 4)                                                                 | https://www.maxbotix.com/articles/095.htm                                               |
+| RTC: PCF 8523                           | SDA (Pin 20), SCL (Pin 21), Wake(Pin 3)                                      | https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino            |
+| SD-Card: Adafruit Micro-SD Breakout+    | MISO (Pin 50), MOSI (Pin 51), SCK (Pin 52), CS (Pin 53), Card Detect (Pin 6) | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction  |
+| Water Temp: Adafruit DS18B20            | Pin 5                                                                        | https://www.adafruit.com/product/381                                                    |
+| Climate Data: Adafruit BME280           | SCK (Pin 20), SDO(N/A), SDI (Pin 21), CS(N/A)                                | https://www.adafruit.com/product/2652                                                   |
+| Communication: RockBLOCK 19354          | Sleep (Pin 2), TX (Pin 18), RX (Pin 19)                                      | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/    |
 
 ![Image of Station](https://github.com/GeoGuy-ca/DistributedWaterLevelMonitor/blob/master/photos/20200525_131511.jpg)
 
-The station is constructed inside of a reusable sealing food container, all components were hot glued to the lid of the container and then cables for external sensors were run through holes and sealed with silicon.
+[//]: # (The station is constructed inside of a reusable sealing food container, all components were hot glued to the lid of the container and then cables for external sensors were run through holes and sealed with silicon.)
 
-The water level sensor was attached to a 1x4, which was in tern screwed to the side of a bridge holding it at a steady position above the water.
+The station is constructed inside of a Fibox Arca type weatherproof enclosure. All components are secured via VELCRO Industrial Strength fasteners, providing a degree of shock absorption. We are using marine grade shrink tubing on some of the components with a 3:1 shrink ratio and an internal adhesive, which ensures a watertight seal on any cable joints.
+
+[//]: # (The water level sensor was attached to a 1x4, which was in tern screwed to the side of a bridge holding it at a steady position above the water.)
 
 ![Image of Ultrasonic Sensor](https://github.com/GeoGuy-ca/DistributedWaterLevelMonitor/blob/master/photos/20200525_131445.jpg)
 
