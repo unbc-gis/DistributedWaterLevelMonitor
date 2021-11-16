@@ -15,17 +15,16 @@ The individual stations communicate via RockBLOCK satillite modems using the Iri
 By placing all the data into a central database, there are options opened for correlating measurements across watersheds, and viewing the same watercourse at different points.
 
 ## The Station
-The station is built using an Arduino Microcontroller (original prototype was Arduino Micro, however Arduino Mega is the recommeneded board as it contains sufficent storage space for SD card Library for more frequent logging).
+The station is built using an Arduino Microcontroller (the original prototype used an Arduino Micro, however an Arduino Mega is the recommeneded board as it contains sufficent storage space for SD card Library for more frequent logging).
 
-The station makes use of the following sesors. 
-* MaxBotix MB7052-100 Ultrasonic Range Finder for water level monitoring
-* Adafruit DS18b20 for water temperature monitoring
-* Adafruit BME280 for weather monitoring (Temperature, Humidity, Pressure)
-
-Data transmission: RockBLOCK 19354
-Data Logging: Adafuit Micro-SD Breakout+
-Real time Clock: PCF 8523
-Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
+The station makes use of the following sensors. 
+* MaxBotix MB7052-100 Ultrasonic Range Finder – for water level monitoring
+* Adafruit DS18b20 – for water temperature monitoring
+* Adafruit BME280 – for weather monitoring (Temperature, Humidity, Pressure)
+* Data transmission: RockBLOCK 19354
+* Data Logging: Adafuit Micro-SD Breakout+
+* Real time Clock: PCF 8523
+* Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
 
 ![Image of Station](https://github.com/GeoGuy-ca/DistributedWaterLevelMonitor/blob/master/photos/20200525_131511.jpg)
 
