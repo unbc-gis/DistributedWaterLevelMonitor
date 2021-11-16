@@ -1,10 +1,10 @@
 # DistributedWaterLevelMonitor
 Python Application for monitoring waterlevel at provincial scale
 
-Installation:
+* Installation:
 Install PostgreSQL and create a database and user, add login credentials to passwd.cred
 
-Add new deployment:
+* Add new deployment:
 Use the script addDeployment.py, setting the IMEI, Location and Mounting Height, lines 5-7
 
 
