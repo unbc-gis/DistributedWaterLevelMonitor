@@ -94,6 +94,7 @@ DateTime currentTime;
 void goToSleep()
 {
   Serial.println("Sleeping...");
+
   sleep_enable();
   set_sleep_mode(SLEEP_MODE_PWR_DOWN);
 
@@ -114,7 +115,7 @@ void goToSleep()
   // timer but not everything prints out on the serial before the Arduino goes to sleep.
   // Good to enable for debugging purposes.
 
-    delay(1000); // Helps to ensure that any writes or serial prints finish before sleeping.
+  // delay(1000); // Helps to ensure that any writes or serial prints finish before sleeping.
   sleep_cpu();
 }
 
