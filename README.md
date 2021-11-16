@@ -29,19 +29,19 @@ The station is built using an Arduino Microcontroller (the original prototype us
      readings and saving them to an SD Card.
    * For example, a measurement can be taken every 15 minutes and saved to the SD Card. The measurements at 90 minutes,
      180 minutes, 270 minutes, and 360 minutes would be sent to the web server.
-* Low-power device – uses a real-time clock (RTC) with an interrupt to bring the Arduino to a lower power sleep between readings.
+* Low-power device – uses a real-time clock (RTC) with an interrupt to bring the Arduino to a lower power sleep between readings—ideal for solar power.
 
 
 ### Sensors & Hardware
 
 The station makes use of the following sensors. 
-* MaxBotix MB7052-100 Ultrasonic Range Finder – for water level monitoring
-* Adafruit DS18b20 – for water temperature monitoring
-* Adafruit BME280 – for weather monitoring (Temperature, Humidity, Pressure)
-* Data transmission: RockBLOCK 19354
-* Data Logging: Adafuit Micro-SD Breakout+
-* Real time Clock: PCF 8523
-* Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
+* **MaxBotix MB7052-100 Ultrasonic Range Finder** – for water level monitoring
+* **Adafruit DS18b20** – sensors for water temperature monitoring
+* **Adafruit BME280** – sensors for weather monitoring (Temperature, Humidity, Pressure)
+* **RockBLOCK 19354** – satellite module data transmission
+* **Adafuit Micro-SD Breakout+** – data logging
+* **PCF 8523** – real time clock (RTC)
+* Power is provided by a compact lead-acid battery, a 6-36v to 5v voltage regulator, hooked up to a solar panel.
 
 ### PIns
 
