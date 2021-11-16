@@ -43,7 +43,7 @@ The station makes use of the following sensors.
 * Real time Clock: PCF 8523
 * Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
 
-## PIns
+### PIns
 
 [//]: # (Talk about the pins, maybe have a photo of the Arduino board? Maybe trace the wires in the picture? I don't know how I want to do this yet.)
 
