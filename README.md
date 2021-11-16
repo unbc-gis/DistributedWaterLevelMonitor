@@ -60,7 +60,7 @@ The station makes use of the following sensors.
 
 [//]: # (The station is constructed inside of a reusable sealing food container, all components were hot glued to the lid of the container and then cables for external sensors were run through holes and sealed with silicon.)
 
-The station is constructed inside of a Fibox Arca type weatherproof enclosure. All components are secured via VELCRO Industrial Strength fasteners, providing a degree of shock absorption. We are using marine grade shrink tubing on some of the components with a 3:1 shrink ratio and an internal adhesive, which ensures a watertight seal on any cable joints.
+The station is constructed inside of a [Fibox ARCA type weatherproof enclosure](https://www.fibox.com/products/ARCA-IEC/ARCA-504021). All components are secured via VELCRO Industrial Strength fasteners, providing a degree of shock absorption. We are using marine grade shrink tubing on some of the components with a 3:1 shrink ratio and an internal adhesive, which ensures a watertight seal on any cable joints.
 
 [//]: # (The water level sensor was attached to a 1x4, which was in tern screwed to the side of a bridge holding it at a steady position above the water.)
 
