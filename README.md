@@ -5,7 +5,7 @@ Installation:
 Install PostgreSQL and create a database and user, add login credentials to passwd.cred
 
 Add new deployment:
-Use the script addDeployment.py, setting the IMEI, Location and Mounting heigt, lines 5-7
+Use the script addDeployment.py, setting the IMEI, Location and Mounting height, lines 5-7
 
 
 # The Project
@@ -32,7 +32,7 @@ The station is built using an Arduino Microcontroller (the original prototype us
 * Low-power device – uses a real-time clock (RTC) with an interrupt to bring the Arduino to a lower power sleep between readings.
 
 
-### Sensors
+### Sensors & Hardware
 
 The station makes use of the following sensors. 
 * MaxBotix MB7052-100 Ultrasonic Range Finder – for water level monitoring
