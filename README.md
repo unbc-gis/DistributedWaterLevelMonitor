@@ -7,6 +7,7 @@ Install PostgreSQL and create a database and user, add login credentials to pass
 Add new deployment:
 Use the script addDeployment.py, setting the IMEI, Location and Mounting heigt, lines 5-7
 
+
 # The Project
 This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests Lands and Natural Resourses. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
 
@@ -14,8 +15,24 @@ The individual stations communicate via RockBLOCK satillite modems using the Iri
 
 By placing all the data into a central database, there are options opened for correlating measurements across watersheds, and viewing the same watercourse at different points.
 
+
 ## The Station
 The station is built using an Arduino Microcontroller (the original prototype used an Arduino Micro, however an Arduino Mega is the recommeneded board as it contains sufficent storage space for SD card Library for more frequent logging).
+
+
+### Features
+
+* Capable of reading a variety of measurements: air temperature, water temperature, air pressure, humidity, water depth.
+* The station sends data via satellite – 4 readings every 6 hours by default which gets captured to the web server.
+   * Easily tuned by modifying paramaters in the Arduino code.
+   * While the satellite module can only send 4 readings per transmission, the station is also capable of taking more frequent
+     readings and saving them to an SD Card.
+   * For example, a measurement can be taken every 15 minutes and saved to the SD Card. The measurements at 90 minutes,
+     180 minutes, 270 minutes, and 360 minutes would be sent to the web server.
+* Low-power device – uses a real-time clock (RTC) with an interrupt to bring the Arduino to a lower power sleep between readings.
+
+
+### Sensors
 
 The station makes use of the following sensors. 
 * MaxBotix MB7052-100 Ultrasonic Range Finder – for water level monitoring
@@ -25,6 +42,7 @@ The station makes use of the following sensors.
 * Data Logging: Adafuit Micro-SD Breakout+
 * Real time Clock: PCF 8523
 * Power is provided by a lead-acid car battery and a 6-36v to 5v voltage regulator
+
 
 ![Image of Station](https://github.com/GeoGuy-ca/DistributedWaterLevelMonitor/blob/master/photos/20200525_131511.jpg)
 
