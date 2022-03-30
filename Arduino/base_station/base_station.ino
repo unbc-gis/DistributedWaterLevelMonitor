@@ -30,8 +30,8 @@
 /* Time Periods */
 
 // For best results recordPeriod should be a clean divisor of transmitPeriod.
-#define transmitPeriod 4 // In minutes
-#define recordPeriod 1 // In minutes
+#define transmitPeriod 360 // In minutes
+#define recordPeriod 15 // In minutes
 
 // We will use the above to calculate the number of readings before to record
 // to the SD card. "transmitReadings" macro below defines how many will be sent
@@ -468,7 +468,7 @@ void loop() {
       //Serial.print(" ");
     }
     Serial.println();
-//    isbd.sendSBDBinary(message, payload);
+    isbd.sendSBDBinary(message, payload);
     Serial.println("Sent");
 
     for (int i = 0; i < transmitReadings; i++) {
