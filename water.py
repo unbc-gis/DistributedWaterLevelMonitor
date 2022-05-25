@@ -60,7 +60,7 @@ def rock_block():
     transmit_time = request.form.get('transmit_time')
     iridium_latitude = request.form.get("iridium_latitude")
     iridium_longitude = request.form.get("iridium_longitude")
-    iridum_cep = request.form.get("iridium_cep")
+    iridium_cep = request.form.get("iridium_cep")
     payload = request.form.get('data')
 
     print(request.form, file=sys.stdout)
@@ -70,28 +70,28 @@ def rock_block():
 
     period = int(payload[8:12], 16)
 
-    time1 = datetime.utcfromtimestamp(int(payload[0:8], 16))
+    time1 = datetime.utcfromtimestamp(int(payload[0:8], 16)) - timedelta(minutes=(period / 4)*3)
     level1 = int(payload[12:16], 16)
     water_temp1 = int(payload[16:20], 16)/100.0
     air_temp1 = int(payload[20:24], 16)/100.0
     humidity1 = int(payload[24:28], 16)/100.0
     pressure1 = int(payload[28:32], 16)/1000.0
 
-    time2 = time1 + timedelta(minutes=period)
+    time2 = time1 + timedelta(minutes=(period / 4))
     level2 = int(payload[32:36], 16)
     water_temp2 = int(payload[36:40], 16) / 100.0
     air_temp2 = int(payload[40:44], 16) / 100.0
     humidity2 = int(payload[44:48], 16) / 100.0
     pressure2 = int(payload[48:52], 16) / 1000.0
 
-    time3 = time2 + timedelta(minutes=period)
+    time3 = time2 + timedelta(minutes=(period / 4))
     level3 = int(payload[52:56], 16)
     water_temp3 = int(payload[56:60], 16) / 100.0
     air_temp3 = int(payload[60:64], 16) / 100.0
     humidity3 = int(payload[64:68], 16) / 100.0
     pressure3 = int(payload[68:72], 16) / 1000.0
 
-    time4 = time3 + timedelta(minutes=period)
+    time4 = time3 + timedelta(minutes=(period / 4))
     level4 = int(payload[72:76], 16)
     water_temp4 = int(payload[76:80], 16) / 100.0
     air_temp4 = int(payload[80:84], 16) / 100.0
@@ -114,6 +114,8 @@ def rock_block():
 
     return Response(status=200, mimetype='application/json')
 
+
+@app.route("/import", methods=["POST"])
 
 if __name__ == '__main__':
     app.run()
