@@ -114,9 +114,6 @@ def rock_block():
 
     return Response(status=200, mimetype='application/json')
 
-
-@app.route("/import", methods=["POST"])
-
 if __name__ == '__main__':
     app.run()
 
