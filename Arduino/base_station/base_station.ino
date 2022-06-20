@@ -218,6 +218,16 @@ void setup() {
   delay(1000);
   Serial.println("Serial started");
 
+  // Get battery voltage.
+  analogReference(DEFAULT);
+  pinMode(A0, INPUT);
+  analogRead(A0);
+  delay(1000);
+  Serial.print("Voltage reading: ");
+  Serial.print(5 * ((analogRead(A0) + 1) / 1024.0f));
+  Serial.print("V\n");
+  delay(1000);
+
   Serial.print("Number of readings: ");
   Serial.println(totalReadings);
 
