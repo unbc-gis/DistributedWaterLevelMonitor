@@ -59,7 +59,7 @@ SdFile root;
 #define SD_PIN_CD 6     // SD Card Card Detect Pin
 #define BME_SCK 52
 #define BME_MISO 50
-#define BME_MOSI 51 
+#define BME_MOSI 51
 #define BME_CS 53       // BME280 SPI Pin
 
 
