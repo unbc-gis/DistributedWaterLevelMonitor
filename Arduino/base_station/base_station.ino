@@ -350,7 +350,7 @@ void loop() {
   humidity = floatToInt(bme.readHumidity() * 100);
   Serial.print("Humidity: " + String(humidity) + "; ");
 
-  pressure = floatToInt(bme.readPressure());
+  pressure = floatToInt(bme.readPressure() / 100.0f);
   Serial.print("Pressure: " + String(pressure) + "; ");
 
   Serial.print("Count: " + String(count) + "; ");
