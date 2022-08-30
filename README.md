@@ -62,6 +62,7 @@ The station makes use of the following sensors.
 * Sensor end terminates in a Male 3-pin connector
 * The wire connected to the box terminates with a Female 3-pin connector
 * The male/female ends of the water temperature sensor are opposite of the sonar sensor to prevent the wrong sensor from being connected.
+
 | Sensor End - Male            | Station End - Female         |
 | ---------------------------- | ---------------------------- |
 | Red                          | Red                          |
@@ -73,6 +74,7 @@ The station makes use of the following sensors.
 * The wire coming from the box terminates in a Male 3-pin connector.
 * The male/female end are opposite of of the water temperature sensor to prevent the wrong sensor from being connected.
 * It's also good to consider soldering additional wire(s) to the sonar sensor. The main reason for this is to prevent weak solder joints from breaking off. The more wires soldered to the sensor, the more it should hopefully resist a greater degree of accidental twisting or pulling.
+
 | Sensor End - Female          | Station End - Male           |
 | ---------------------------- | ---------------------------- |
 | Vin                          | Red                          |
@@ -83,6 +85,7 @@ The station makes use of the following sensors.
 The BME280 climate sensor uses a 6-pin connector.
 The sensor has the male end.
 The connector coming from the weather station has the female end.
+
 | Sensor End - Male            | Station End - Fenale         |
 | ---------------------------- | ---------------------------- |
 | Ground                       | Ground                       |
@@ -97,6 +100,7 @@ The solar panel uses a 2-wire barrel conector.
 The solar panel connection has the male end.
 The connector coming from the weather station has the female end, this ends up going to .
 The wiring is fairly straightforward.
+
 | Panel End                    | Station End                  |
 | ---------------------------- | ---------------------------- |
 | Red                          | Red                          |
@@ -105,6 +109,7 @@ The wiring is fairly straightforward.
 #### Battery
 The battery has a 2-wire barrel jack going to the Arduino.
 The battery has a 2-wire barrel jack going to the solar panel charge controller.
+
 | Panel End                    | Station End                  |
 | ---------------------------- | ---------------------------- |
 | Red                          | Red                          |
