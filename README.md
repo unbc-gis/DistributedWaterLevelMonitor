@@ -9,7 +9,7 @@ Use the script addDeployment.py, setting the IMEI, Location and Mounting Height,
 
 
 # The Project
-This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests Lands and Natural Resourses. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
+This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests, Lands, and Natural Resourses. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
 
 The individual stations communicate via RockBLOCK satillite modems using the Iridium constellation, and are built using Arduino microcontrollers. By leveraging satellite communication, and low power monitoring tools, it is made practical to deploy sensors in locations without existing cellular or radio infrastructure, and where it may be expensive for crews to access on a regular basis.
 
@@ -17,7 +17,7 @@ By placing all the data into a central database, there are options opened for co
 
 
 ## The Station
-The station is built using an Arduino Microcontroller (the original prototype used an Arduino Micro, however an Arduino Mega is the recommeneded board as it contains sufficent storage space for SD card Library for more frequent logging).
+The station is built using an Arduino Microcontroller (the original prototype used an Arduino Micro, however an Arduino Mega is the recommeneded board as it contains sufficient storage space for SD card Library for more frequent logging).
 
 
 ### Features
@@ -36,7 +36,7 @@ The station is built using an Arduino Microcontroller (the original prototype us
 
 The station makes use of the following sensors. 
 * **MaxBotix MB7052-100 Ultrasonic Range Finder** – for water level monitoring
-* **Adafruit DS18b20** – sensors for water temperature monitoring
+* **Adafruit DS18B20** – sensors for water temperature monitoring
 * **Adafruit BME280** – sensors for weather monitoring (Temperature, Humidity, Pressure)
 * **RockBLOCK 19354** – satellite module data transmission
 * **Adafuit Micro-SD Breakout+** – data logging
@@ -53,8 +53,62 @@ The station makes use of the following sensors.
 | RTC: PCF 8523                           | SDA (Pin 20), SCL (Pin 21), Wake(Pin 3)                                      | https://learn.adafruit.com/adafruit-pcf8523-real-time-clock/rtc-with-arduino            |
 | SD-Card: Adafruit Micro-SD Breakout+    | MISO (Pin 50), MOSI (Pin 51), SCK (Pin 52), CS (Pin 53), Card Detect (Pin 6) | https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/introduction  |
 | Water Temp: Adafruit DS18B20            | Pin 5                                                                        | https://www.adafruit.com/product/381                                                    |
-| Climate Data: Adafruit BME280           | SCK (Pin 20), SDO(N/A), SDI (Pin 21), CS(N/A)                                | https://www.adafruit.com/product/2652                                                   |
+| Climate Data: Adafruit BME280           | SCK (Pin 52), SDO(Pin 50), SDI (Pin 51), CS(Pin 49)                                | https://www.adafruit.com/product/2652                                                   |
 | Communication: RockBLOCK 19354          | Sleep (Pin 2), TX (Pin 18), RX (Pin 19)                                      | https://github.com/mikalhart/IridiumSBD, http://arduiniana.org/libraries/iridiumsbd/    |
+
+### Wiring
+
+#### Water Temp: Adafruit DS18B20
+* Sensor end terminates in a Male 3-pin connector
+* The wire connected to the box terminates with a Female 3-pin connector
+* The male/female ends of the water temperature sensor are opposite of the sonar sensor to prevent the wrong sensor from being connected.
+| Sensor End - Male            | Station End - Female         |
+| ---------------------------- | ---------------------------- |
+| Red                          | Red                          |
+| Blue                         | Black                        |
+| Yellow                       | White                        |
+
+#### MaxBotix MB7052-100
+* Sensor part terminates in a Female 3-pin connector
+* The wire coming from the box terminates in a Male 3-pin connector.
+* The male/female end are opposite of of the water temperature sensor to prevent the wrong sensor from being connected.
+* It's also good to consider soldering additional wire(s) to the sonar sensor. The main reason for this is to prevent weak solder joints from breaking off. The more wires soldered to the sensor, the more it should hopefully resist a greater degree of accidental twisting or pulling.
+| Sensor End - Female          | Station End - Male           |
+| ---------------------------- | ---------------------------- |
+| Vin                          | Red                          |
+| Ground                       | Black                        |
+| Pin 2                        | White                        |
+
+#### BME280 Climate Sensor
+The BME280 climate sensor uses a 6-pin connector.
+The sensor has the male end.
+The connector coming from the weather station has the female end.
+| Sensor End - Male            | Station End - Fenale         |
+| ---------------------------- | ---------------------------- |
+| Ground                       | Ground                       |
+| Vin                          | Black                        |
+| SCK                          | Yellow                       |
+| SDO                          | Blue                         |
+| SDI                          | Red                          |
+| CS                           | Green                        |
+
+#### Solar Panel
+The solar panel uses a 2-wire barrel conector.
+The solar panel connection has the male end.
+The connector coming from the weather station has the female end, this ends up going to .
+The wiring is fairly straightforward.
+| Panel End                    | Station End                  |
+| ---------------------------- | ---------------------------- |
+| Red                          | Red                          |
+| Black                        | Black                        |
+
+#### Battery
+The battery has a 2-wire barrel jack going to the Arduino.
+The battery has a 2-wire barrel jack going to the solar panel charge controller.
+| Panel End                    | Station End                  |
+| ---------------------------- | ---------------------------- |
+| Red                          | Red                          |
+| Black                        | Black                        |
 
 ![Image of Station](https://github.com/GeoGuy-ca/DistributedWaterLevelMonitor/blob/master/photos/20200525_131511.jpg)
 
