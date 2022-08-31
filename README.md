@@ -118,12 +118,12 @@ The battery has a 2-wire barrel jack going to the solar panel charge controller.
 ### Gallery
 
 
-![](photos/thumbnails/20220608_162235_thumbnail.jpg)
-![](photos/thumbnails/20220608_162240_thumbnail.jpg)
-![](photos/thumbnails/20220608_162311_thumbnail.jpg)
-![](photos/thumbnails/20220608_162315_thumbnail.jpg)
-![](photos/thumbnails/20220608_162252_thumbnail.jpg)
-![](photos/thumbnails/20220608_162231_thumbnail.jpg)
+[![](photos/thumbnails/20220608_162235_thumbnail.jpg)](photos/20220608_162235_thumbnail.jpg)
+[![](photos/thumbnails/20220608_162240_thumbnail.jpg)](photos/20220608_162240_thumbnail.jpg)
+[![](photos/thumbnails/20220608_162311_thumbnail.jpg)](photos/20220608_162311_thumbnail.jpg)
+[![](photos/thumbnails/20220608_162315_thumbnail.jpg)](photos/20220608_162315_thumbnail.jpg)
+[![](photos/thumbnails/20220608_162252_thumbnail.jpg)](photos/20220608_162252_thumbnail.jpg)
+[![](photos/thumbnails/20220608_162231_thumbnail.jpg)](photos/20220608_162231_thumbnail.jpg)
 
 ![Image of Station](photos/old/20200525_131511.jpg)
 
