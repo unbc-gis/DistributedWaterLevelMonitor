@@ -17,7 +17,7 @@ By placing all the data into a central database, there are options opened for co
 
 
 ## The Station
-The station is built using an Arduino Microcontroller (the original prototype used an Arduino Micro, however an Arduino Mega is the recommeneded board as it contains sufficient storage space for SD card Library for more frequent logging).
+The station is built using an Arduino Mega. The Mega is the recommended board as it contains sufficient storage space for SD card Library for more frequent logging).
 
 
 ### Features
