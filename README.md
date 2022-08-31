@@ -9,7 +9,7 @@ Use the script addDeployment.py, setting the IMEI, Location and Mounting Height,
 
 
 # The Project
-This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests, Lands, and Natural Resourses. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
+This project is being developed as part of a collaboration between the the UNBC GIS Lab and the BC Ministry of Forests, Lands, and Natural Resources. The purpose of this project is to develop a low cost distributed sensor network for monitoring water levels and flood events across the province. 
 
 The individual stations communicate via RockBLOCK satillite modems using the Iridium constellation, and are built using Arduino microcontrollers. By leveraging satellite communication, and low power monitoring tools, it is made practical to deploy sensors in locations without existing cellular or radio infrastructure, and where it may be expensive for crews to access on a regular basis.
 
@@ -43,7 +43,7 @@ The station makes use of the following sensors.
 * **PCF 8523** – real time clock (RTC)
 * Power is provided by a compact lead-acid battery, a 6-36v to 5v voltage regulator, hooked up to a solar panel.
 
-### PIns
+### Pins
 
 [//]: # (Talk about the pins, maybe have a photo of the Arduino board? Maybe trace the wires in the picture? I don't know how I want to do this yet.)
 
