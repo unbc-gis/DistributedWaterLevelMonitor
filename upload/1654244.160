@@ -1,0 +1,10 @@
+{
+	"iso8601Timestamp": "2022-06-03T08:16:00",
+	"unixTimestamp": "1654244160",
+	"sonar": "471",
+	"waterTemp": "-12700",
+	"airTemp": "954",
+	"Pressure": "28364",
+	"Humidity": "8309",
+	"Current Reading Interval": "2"
+}

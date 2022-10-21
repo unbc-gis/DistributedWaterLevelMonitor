@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/normalize.css') }}">
+<style>
+    #main {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px black solid;
+    }
+
+    h1 {
+        text-align: center;
+    }
+</style>
+<h1>Upload a File</h1>
+<section id="main">
+    <form method="post" enctype="multipart/form-data">
+        {% if contents %}
+        {{ contents }}
+        <br><br>
+        {% endif %}
+        {% if message %}
+        {{ message }}
+            {% if files_not_added %}
+            {{ files_not_added }}
+            {% endif %}
+        <br><br>
+        {% endif %}
+
+        {% if deployments %}
+        <label for="deployment">Select a deployment:</label>
+        <select name="deployments" id="deployments">
+            {% for deployment in deployments %}
+            <option value="{{ deployment.id }}">
+                ID={{ deployment.id }}, IMEI={{ deployment.imei }}, Lat={{ deployment.latitude }}, Long={{ deployment.longitude }}
+            </option>
+            {% endfor %}
+        </select>
+        <br><br>
+        {% endif %}
+
+        <input type="file" name="station-file" multiple><br>
+        <input type="submit"><br>
+    </form>
+</section>

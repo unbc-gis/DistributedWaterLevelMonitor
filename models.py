@@ -51,8 +51,9 @@ class Measurement(db.Model):
     imei = db.Column(db.Text)
     lat = db.Column(db.Numeric)
     lon = db.Column(db.Numeric)
+    datasource = db.Column(db.Text)
 
-    def __init__(self, deployment, time, level, water_temp, air_temp, humidity, pressure, imei, lat, lon):
+    def __init__(self, deployment, time, level, water_temp, air_temp, humidity, pressure, imei, lat, lon, datasource):
         self.deployment = deployment
         self.time = time
         self.level = level
@@ -63,6 +64,7 @@ class Measurement(db.Model):
         self.imei = imei
         self.lat = lat
         self.lon = lon
+        self.datasource = datasource
 
     def __repr__(self):
         return '<id {}>'.format(self.deployment, self.time)
