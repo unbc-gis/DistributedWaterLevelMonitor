@@ -57,10 +57,10 @@ SdFile root;
 #define ONE_WIRE_BUS 5  // Water Temp Sensor
 #define SD_PIN_CS 53    // SD Card Select Pin
 #define SD_PIN_CD 6     // SD Card Card Detect Pin
-//#define BME_SCK 52
-//#define BME_MISO 50
-//#define BME_MOSI 51 
-//#define BME_CS 49       // BME280 SPI Pin
+#define BME_SCK 52
+#define BME_MISO 50
+#define BME_MOSI 51
+#define BME_CS 53       // BME280 SPI Pin
 
 
 /* Sensor Module Data Structures */
@@ -68,8 +68,8 @@ SdFile root;
 IridiumSBD isbd(Serial1, 2);
 OneWire oneWire(ONE_WIRE_BUS);
 DallasTemperature sensors(&oneWire);
-Adafruit_BME280 bme; // I2C
-//Adafruit_BME280 bme(BME_CS); // hardware SPI
+//Adafruit_BME280 bme; // I2C
+Adafruit_BME280 bme(BME_CS); // hardware SPI
 //Adafruit_BME280 bme(BME_CS, BME_MOSI, BME_MISO, BME_SCK); // software SPI
 RTC_PCF8523 rtc;
 
@@ -218,6 +218,16 @@ void setup() {
   delay(1000);
   Serial.println("Serial started");
 
+  // Get battery voltage.
+  analogReference(DEFAULT);
+  pinMode(A0, INPUT);
+  analogRead(A0);
+  delay(1000);
+  Serial.print("Voltage reading: ");
+  Serial.print(5 * ((analogRead(A0) + 1) / 1024.0f));
+  Serial.print("V\n");
+  delay(1000);
+
   Serial.print("Number of readings: ");
   Serial.println(totalReadings);
 
@@ -247,8 +257,8 @@ void setup() {
   Serial.println("Adafruit DS18B20 inititalized.");
 
   // Initialize BME280
-  if (!bme.begin(0x77)) { // I2C
-  //if (!bme.begin()) { // SPI
+//  if (!bme.begin(0x77)) { // I2C
+  if (!bme.begin()) { // SPI
     Serial.println("Could not find BME280 Climate Sensor.");
   } else {
     Serial.println("BME820 Climate Sensor initialized.");
@@ -273,12 +283,12 @@ void setup() {
   bme.readHumidity();
   bme.readPressure();
 
-  int isbd_err = isbd.begin();
-  if (isbd_err != ISBD_SUCCESS) {
-    Serial.println("RockBLOCK could not intialize.");
-  } else {
-    Serial.println("RockBLOCK initialized.");
-  }
+//  int isbd_err = isbd.begin();
+//  if (isbd_err != ISBD_SUCCESS) {
+//    Serial.println("RockBLOCK could not intialize.");
+//  } else {
+//    Serial.println("RockBLOCK initialized.");
+//  }
 //  isbd.useMSSTMWorkaround(false);
 
   Serial.println("Sat Comms Started");
@@ -340,7 +350,7 @@ void loop() {
   humidity = floatToInt(bme.readHumidity() * 100);
   Serial.print("Humidity: " + String(humidity) + "; ");
 
-  pressure = floatToInt(bme.readPressure());
+  pressure = floatToInt(bme.readPressure() / 100.0f);
   Serial.print("Pressure: " + String(pressure) + "; ");
 
   Serial.print("Count: " + String(count) + "; ");
@@ -408,6 +418,7 @@ void loop() {
       myFile.print("\",\n");
       myFile.print("\t\"Current Reading Interval\": \"");
       myFile.print(currentReadingInterval);
+      myFile.print("\",\n");
       myFile.flush();
       myFile.close();
       Serial.println("Done writing to file.");
